@@ -1,0 +1,12 @@
+<library path="lib/libfranka_gripper_mujoco">
+
+  <class
+      name="franka_mujoco/FrankaGripperMujoco"
+      type="franka_mujoco::FrankaGripperMujoco"
+      base_class_type="controller_interface::ControllerBase">
+      <description>
+          A controller that controls two finger joints of the a panda hand and offers a similar action interface to franka_gripper
+      </description>
+  </class>
+
+</library>
