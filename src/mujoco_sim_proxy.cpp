@@ -6,7 +6,7 @@ namespace MujocoSimProxy {
 
 using namespace detail;
 
-int jointName2id(const std::string joint_name)
+int jointName2id(const std::string &joint_name)
 {
 	return mj_name2id(m_, mjOBJ_JOINT, joint_name.c_str());
 }
@@ -49,12 +49,27 @@ void init(std::string modelfile)
 	std::strcpy(filename_, modelfile.c_str());
 	loadModel();
 
+	nh_->getParam("initial_joint_positions/joint_map", init_joint_pos_map_);
+
+	for (auto const &[name, value] : init_joint_pos_map_) {
+		ROS_INFO_STREAM_NAMED("MujocoSim", "Map k&v: " << name << ", " << value);
+		int id = jointName2id(name);
+		if (id == -1) {
+			ROS_WARN_STREAM_NAMED(
+			    "MujocoSim", "Joint with name '" << name << "' could not be found. Initial joint position cannot be set!");
+			continue;
+		}
+
+		ROS_DEBUG_STREAM_NAMED("MujocoSim",
+		                       "Joint name '" << name << "' (mjID '" << id << "') setting to value " << value);
+
+		setJointPosition(value, id);
+	}
+
 	std::thread simthread(simulate);
 	eventloop();
 
 	ROS_INFO_NAMED("mujoco_sim_proxy", "Event loop terminated");
-
-	// std::this_thread::sleep_for(std::chrono::minutes(2));
 
 	settings_.exitrequest = 1;
 	simthread.join();
@@ -70,13 +85,13 @@ void init(std::string modelfile)
 }
 
 // Get current position, velocity, acceleration, and effort of a specific joint
-std::array<double, 4> getJointData(const int joint_id)
+std::array<double, 4> getJointData(const int &joint_id)
 {
 	return { d_->qpos[m_->jnt_qposadr[joint_id]], d_->qvel[m_->jnt_dofadr[joint_id]], d_->qacc[m_->jnt_dofadr[joint_id]],
 		      d_->qfrc_applied[m_->jnt_dofadr[joint_id]] };
 }
 
-double getBodyMass(const int body_id)
+double getBodyMass(const int &body_id)
 {
 	return m_->body_mass[body_id];
 }
@@ -108,9 +123,16 @@ std::array<double, 3> getGravity(void)
 	return { m_->opt.gravity[0], m_->opt.gravity[1], m_->opt.gravity[2] };
 }
 
-void setJointEffort(const double command, const int joint_id)
+void setJointEffort(const double &command, const int &joint_id)
 {
 	d_->qfrc_applied[m_->jnt_dofadr[joint_id]] = command;
+}
+
+void setJointPosition(const double &pos, const int &joint_id)
+{
+	d_->qpos[m_->jnt_qposadr[joint_id]]        = pos;
+	d_->qvel[m_->jnt_dofadr[joint_id]]         = 0;
+	d_->qfrc_applied[m_->jnt_dofadr[joint_id]] = 0;
 }
 
 namespace detail {

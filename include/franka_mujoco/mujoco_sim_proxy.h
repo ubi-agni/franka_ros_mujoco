@@ -44,15 +44,16 @@ static std::mutex render_mtx;
 
 // Getters
 std::array<double, 3> getGravity(void);
-std::array<double, 4> getJointData(const int joint_id);
+std::array<double, 4> getJointData(const int &joint_id);
 
-int jointName2id(const std::string joint_name);
-double getBodyMass(const int body_id);
+int jointName2id(const std::string &joint_name);
+double getBodyMass(const int &body_id);
 
 bool isUp(void);
 
 // Setters
-void setJointEffort(const double command, const int joint_id);
+void setJointEffort(const double &command, const int &joint_id);
+void setJointPosition(const double &pos, const int &joint_id);
 
 namespace detail {
 // model and data
@@ -62,6 +63,9 @@ static mjData *d_  = NULL;
 // filename strings
 static char filename_[kBufSize]          = "";
 static char previous_filename_[kBufSize] = "";
+
+// initial joint positions to set on load
+static std::map<std::string, double> init_joint_pos_map_;
 
 // control noise variables
 static mjtNum *ctrlnoise_ = nullptr;
@@ -78,6 +82,9 @@ static double last_rendered_ = 0;
 void publishSimTime();
 static ros::Publisher pub_clock_;
 static boost::shared_ptr<ros::NodeHandle> nh_;
+
+// Services
+static std::vector<ros::ServiceServer> service_servers_;
 
 // Keep track of time for resets to not mess up ros time
 static mjtNum last_time_;
