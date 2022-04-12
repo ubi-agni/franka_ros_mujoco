@@ -52,7 +52,6 @@ void init(std::string modelfile)
 	nh_->getParam("initial_joint_positions/joint_map", init_joint_pos_map_);
 
 	for (auto const &[name, value] : init_joint_pos_map_) {
-		ROS_INFO_STREAM_NAMED("MujocoSim", "Map k&v: " << name << ", " << value);
 		int id = jointName2id(name);
 		if (id == -1) {
 			ROS_WARN_STREAM_NAMED(

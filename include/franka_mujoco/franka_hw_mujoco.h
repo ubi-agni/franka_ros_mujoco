@@ -45,12 +45,10 @@ public:
 	bool setBodyPoseCB(franka_msgs::SetLoad::Request &req, franka_msgs::SetLoad::Response &rep);
 
 private:
-	/// If gazebo::Joint::GetForceTorque() yielded already a non-zero value
 	bool efforts_initialized_;
 	std::array<double, 3> gravity_earth_;
 
-	// For now this is constant because nothing else is supported
-	const std::string arm_id_ = "panda";
+	std::string arm_id_;
 
 	std::map<std::string, std::shared_ptr<franka_mujoco::Joint>> joints_;
 

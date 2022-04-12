@@ -52,6 +52,10 @@ bool FrankaHWSim::initRobot(ros::NodeHandle &nh)
 {
 	efforts_initialized_ = false;
 
+	// Default to 'panda' as arm_id
+	nh.param<std::string>("arm_id", arm_id_, "panda");
+	ROS_DEBUG_STREAM_NAMED("franka_hw_sim", "arm_id is '" << arm_id_ << "'");
+
 	nh.param<double>("tau_ext_lowpass_filter", tau_ext_lowpass_filter_, kDefaultTauExtLowpassFilter);
 	ROS_DEBUG_NAMED("franka_hw_sim", "tau is: %f", tau_ext_lowpass_filter_);
 
