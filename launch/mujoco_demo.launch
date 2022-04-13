@@ -14,7 +14,7 @@
     </include>
 
     <!-- <include file="$(find panda_moveit_config)/launch/demo.launch" pass_all_args="true"> -->
-    <include file="$(find panda_moveit_config)/demo.launch" pass_all_args="true">
+    <include file="$(find panda_moveit_config)/launch/demo.launch" pass_all_args="true">
          <!-- Description is already loaded by the mujoco launchfile  -->
         <arg name="load_robot_description" value="false" />
          <!-- Simple controller manager provides ros_control's JointTrajectory controllers as well as GripperCommand actions  -->
