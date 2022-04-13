@@ -29,7 +29,7 @@ int main(int argc, char **argv)
 	franka_mujoco::FrankaHWSim hw_sim(nh);
 	controller_manager::ControllerManager cm(&hw_sim);
 
-	double control_rate = 0.003;
+	double control_rate = 0.001;
 	ros::Rate loop_rate(1 / control_rate);
 	ros::Duration d;
 	ros::Time last_time(ros::Time::now());
