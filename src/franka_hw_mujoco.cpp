@@ -330,7 +330,7 @@ void FrankaHWSim::writeSim(ros::Time time, ros::Duration period)
 {
 	MujocoSimProxy::sim_mtx.lock();
 
-	auto g = model_->gravity(robot_state_, gravity_earth_);
+	auto g = model_->gravity(robot_state_, MujocoSimProxy::getGravity());
 
 	for (auto &pair : joints_) {
 		auto joint = pair.second;
@@ -375,6 +375,8 @@ bool FrankaHWSim::readParameters(const ros::NodeHandle &nh, const urdf::Model &u
 		nh.param<std::string>("EE_T_K", EE_T_K, "1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 1");
 		robot_state_.EE_T_K = readArray<16>(EE_T_K, "EE_T_K");
 
+		// TODO: Currently doesn't do anything. Gravity is taken directly from MuJoCo
+		// The gravity can be changed on the fly, how should it be updated?
 		std::string gravity_vector;
 		if (nh.getParam("gravity_vector", gravity_vector)) {
 			gravity_earth_ = readArray<3>(gravity_vector, "gravity_vector");
