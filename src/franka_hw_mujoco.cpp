@@ -369,7 +369,8 @@ bool FrankaHWSim::readParameters(const ros::NodeHandle &nh, const urdf::Model &u
 
 		std::string NE_T_EE; // NOLINT [readability-identifier-naming]
 		nh.param<std::string>("NE_T_EE", NE_T_EE, "1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 1");
-		robot_state_.EE_T_K = readArray<16>(NE_T_EE, "NE_T_EE");
+
+		robot_state_.NE_T_EE = readArray<16>(NE_T_EE, "NE_T_EE");
 
 		std::string EE_T_K; // NOLINT [readability-identifier-naming]
 		nh.param<std::string>("EE_T_K", EE_T_K, "1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 1");
