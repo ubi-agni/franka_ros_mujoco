@@ -9,7 +9,19 @@ void Joint::update(const ros::Duration &dt)
 {
 	std::array<double, 4> sim_vals = MujocoSimProxy::getJointData(id);
 
-	position     = sim_vals[0];
+	double pos = sim_vals[0];
+
+	switch (type) {
+		case urdf::Joint::PRISMATIC:
+			position = pos;
+			break;
+
+		case urdf::Joint::REVOLUTE:
+		case urdf::Joint::CONTINUOUS:
+			position += angles::shortest_angular_distance(position, pos);
+			break;
+	}
+
 	velocity     = sim_vals[1];
 	acceleration = sim_vals[2];
 	effort       = sim_vals[3];
