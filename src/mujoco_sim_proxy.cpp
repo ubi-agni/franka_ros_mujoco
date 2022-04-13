@@ -210,6 +210,9 @@ void simulate(void)
 				if (d_->time * settings_.slow_down < simsync || tmstart < cpusync || cpusync == 0 ||
 				    offset > syncmisalign_ * settings_.slow_down || settings_.speed_changed) {
 					// Re-sync
+
+					ROS_WARN_STREAM_NAMED("Mujoco", "Out of sync by " << offset << ". Re-syncing...");
+
 					cpusync                 = tmstart;
 					simsync                 = d_->time * settings_.slow_down;
 					settings_.speed_changed = false;
