@@ -1,7 +1,8 @@
 cmake_minimum_required(VERSION 3.4)
 project(franka_mujoco)
 
-add_compile_options(-std=c++17)
+set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
@@ -28,9 +29,10 @@ find_package(catkin REQUIRED
 
 )
 
-message(STATUS "INSTALLING TO: ${CATKIN_PACKAGE_BIN_DESTINATION}")
-
-find_package(Franka 0.7.0 REQUIRED)
+find_package(Franka 0.9.0 QUIET)
+if(NOT Franka_FOUND)
+  find_package(Franka 0.8.0 REQUIRED)
+endif()
 find_package(Eigen3 REQUIRED)
 find_package(orocos_kdl REQUIRED)
 
@@ -38,16 +40,21 @@ catkin_package(
   CATKIN_DEPENDS
     roscpp
     angles
-    # TinyXML
-
-    #From Franka Code
+    controller_manager
+    controller_interface
+    control_toolbox
+    pluginlib
+    hardware_interface
+    transmission_interface
+    joint_limits_interface
     eigen_conversions
+    urdf
     kdl_parser
     franka_hw
     # franka_msgs
     franka_gripper
     franka_example_controllers
-    transmission_interface
+  INCLUDE_DIRS include
   LIBRARIES
     franka_gripper_mujoco
   DEPENDS
@@ -61,35 +68,53 @@ catkin_package(
 
 ## Specify additional locations of header files
 ## Your package locations should be listed before other locations
+
+link_directories(
+  ${catkin_LIBRARY_DIRS}
+)
+
 include_directories(
  include
  ${catkin_INCLUDE_DIRS}
-#  ${orocos_kdl_INCLUDE_DIRS}
  ${EIGEN3_INCLUDE_DIRS}
  ${Franka_INCLUDE_DIRS}
+ ${Boost_INCLUDE_DIR}
 )
 
-add_executable(${PROJECT_NAME}_node
-    src/main.cpp
-    src/mujoco_sim_proxy.cpp
-    src/franka_hw_mujoco.cpp
-    src/joint.cpp
-    src/model_kdl.cpp
-    src/uitools.c
+add_executable(${PROJECT_NAME}
+  src/main.cpp
+  src/mujoco_sim_proxy.cpp
+  src/franka_hw_mujoco.cpp
+  src/joint.cpp
+  src/model_kdl.cpp
+  src/uitools.c
+  src/controller_verifier.cpp
 )
 
+if (Franka_VERSION GREATER_EQUAL 0.9)
+  target_compile_definitions(${PROJECT_NAME} PUBLIC ENABLE_BASE_ACCELERATION)
+endif()
 
 find_library(GLFW libglfw.so.3)
 LINK_DIRECTORIES( ${MUJOCO_HOME}/mujoco/bin )
-target_link_libraries(${PROJECT_NAME}_node
+target_link_libraries(${PROJECT_NAME}
    ${catkin_LIBRARIES}
    mujoco
    GL
    GLEW
    ${GLFW}
-   ${TinyXML_LIBRARIES}
    ${Franka_LIBRARIES}
-  #  ${orocos_kdl_LIBRARIES}
+   ${orocos_kdl_LIBRARIES}
+ )
+ target_include_directories(${PROJECT_NAME} SYSTEM PUBLIC
+  ${Franka_INCLUDE_DIRS}
+  ${EIGEN3_INCLUDE_DIRS}
+  ${orocos_kdl_INCLUDE_DIRS}
+  ${catkin_INCLUDE_DIRS}
+ )
+ add_dependencies(${PROJECT_NAME}
+  ${${PROJECT_NAME}_EXPORTED_TARGETS}
+  ${catkin_EXPORTED_TARGETS}
  )
 
 add_library(franka_gripper_mujoco
@@ -119,7 +144,7 @@ install(
   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
 )
 
-install(TARGETS ${PROJECT_NAME}_node franka_gripper_mujoco
+install(TARGETS ${PROJECT_NAME} franka_gripper_mujoco
   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
   LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
 )
@@ -132,6 +157,10 @@ install(DIRECTORY config
 )
 install(DIRECTORY assets
   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
+)
+
+catkin_install_python(PROGRAMS scripts/delayed_controller_spawner.py
+  DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
 
 #############

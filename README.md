@@ -3,7 +3,6 @@
 This repository is a rewrite of the [franka_gazebo](https://github.com/frankaemika/franka_ros/tree/develop/franka_gazebo) package to work with MuJoCo. Program to setup the MuJoCo simulation (ported from the standard simulation.cc program) is also included.
 
 ### TODOS:
-- [ ] Sometimes MuJoCo get's a big sync offset (so far only happened while using moveit to move the robot and only when getting close to the singularities), tries to re-sync, which causes a everything to blow up. Might have something to do with libfranka 0.9 update.
-- [ ] Incorporate changes made in franka_ros 0.9.0
+- [ ] Sometimes the control gets unstable. Reducing the simulation speed re-stabilizes the robot, so this might have something to do with to much time passing between clock updates while running at realtime?
 - [ ] Add disabled contacts
 - [ ] Split MujocoSimProxy to a separate package and handle communication via ROS messages

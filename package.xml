@@ -37,6 +37,8 @@
   <depend>tf2</depend>
   <depend>tf2_ros</depend>
   <depend>tinyxml</depend>
+  <depend>pluginlib</depend>
+  <depend>urdf</depend>
   <depend>message_generation</depend>
   <depend>control_msgs</depend>
   <depend>control_toolbox</depend>
@@ -51,6 +53,9 @@
   <depend>franka_gripper</depend>
   <depend>franka_example_controllers</depend>
   <depend>kdl_parser</depend>
+
+  <exec_depend>rospy</exec_depend>
+  <exec_depend>roslaunch</exec_depend>
 
   <export>
     <controller_interface plugin="${prefix}/franka_gripper_mujoco_plugin.xml" />
