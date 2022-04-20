@@ -4,7 +4,7 @@ add_rostest_gtest(franka_hw_mujoco_test
     launch/franka_hw_mujoco.test
     main.cpp
     jacobian_tests.cpp
-    # fk_tests.cpp
+    fk_tests.cpp
     gravity_tests.cpp
 )
 
