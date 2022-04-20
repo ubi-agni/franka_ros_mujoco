@@ -1,0 +1,5 @@
+<?xml version="1.0"?>
+<launch>
+    <param name="robot_description" textfile="$(find franka_mujoco)/test/launch/panda-mujoco.urdf" />
+    <test test-name="franka_hw_mujoco_test" pkg="franka_mujoco" type="franka_hw_mujoco_test"/>
+</launch>
