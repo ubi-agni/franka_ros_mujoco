@@ -32,7 +32,7 @@
   <env name="ROSCONSOLE_CONFIG_FILE"
        value="$(find franka_mujoco)/config/rosconsole.config"/>
 
-  <node pkg="franka_mujoco" type="franka_mujoco" name="franka_mujoco" output="screen" >
+  <node pkg="franka_mujoco" type="franka_mujoco_node" name="franka_mujoco" output="screen" >
     <param name="modelfile" type="str"  value="$(find franka_mujoco)/assets/panda.xml" />
     <param name="unpause"   value="$(arg unpause)" />
     <param name="arm_id"    type="str"  value="$(arg arm_id)" />

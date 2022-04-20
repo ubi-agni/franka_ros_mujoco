@@ -81,8 +81,7 @@ include_directories(
  ${Boost_INCLUDE_DIR}
 )
 
-add_executable(${PROJECT_NAME}
-  src/main.cpp
+add_library(franka_hw_mujoco
   src/mujoco_sim_proxy.cpp
   src/franka_hw_mujoco.cpp
   src/joint.cpp
@@ -92,12 +91,12 @@ add_executable(${PROJECT_NAME}
 )
 
 if (Franka_VERSION GREATER_EQUAL 0.9)
-  target_compile_definitions(${PROJECT_NAME} PUBLIC ENABLE_BASE_ACCELERATION)
+  target_compile_definitions(franka_hw_mujoco PUBLIC ENABLE_BASE_ACCELERATION)
 endif()
 
 find_library(GLFW libglfw.so.3)
 LINK_DIRECTORIES( ${MUJOCO_HOME}/mujoco/bin )
-target_link_libraries(${PROJECT_NAME}
+target_link_libraries(franka_hw_mujoco
    ${catkin_LIBRARIES}
    mujoco
    GL
@@ -106,13 +105,13 @@ target_link_libraries(${PROJECT_NAME}
    ${Franka_LIBRARIES}
    ${orocos_kdl_LIBRARIES}
  )
- target_include_directories(${PROJECT_NAME} SYSTEM PUBLIC
+ target_include_directories(franka_hw_mujoco SYSTEM PUBLIC
   ${Franka_INCLUDE_DIRS}
   ${EIGEN3_INCLUDE_DIRS}
   ${orocos_kdl_INCLUDE_DIRS}
   ${catkin_INCLUDE_DIRS}
  )
- add_dependencies(${PROJECT_NAME}
+ add_dependencies(franka_hw_mujoco
   ${${PROJECT_NAME}_EXPORTED_TARGETS}
   ${catkin_EXPORTED_TARGETS}
  )
@@ -131,6 +130,14 @@ add_dependencies(franka_gripper_mujoco
   ${catkin_EXPORTED_TARGETS}
 )
 
+add_executable(${PROJECT_NAME}_node
+  src/main.cpp
+)
+target_link_libraries(${PROJECT_NAME}_node
+  franka_hw_mujoco
+)
+
+
 #############
 ## Install ##
 #############
@@ -144,7 +151,7 @@ install(
   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
 )
 
-install(TARGETS ${PROJECT_NAME} franka_gripper_mujoco
+install(TARGETS franka_hw_mujoco ${PROJECT_NAME}_node franka_gripper_mujoco
   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
   LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
 )
