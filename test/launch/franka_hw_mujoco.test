@@ -1,5 +1,10 @@
 <?xml version="1.0"?>
 <launch>
-    <param name="robot_description" textfile="$(find franka_mujoco)/test/launch/panda-mujoco.urdf" />
+    <include file="$(find franka_mujoco)/launch/panda.launch">
+        <arg name="controller" value="cartesian_impedance_example_controller" />
+        <arg name="arm_id" value="panda" />
+        <arg name="modelfile" value="$(find franka_mujoco)/assets/empty_world.xml" />
+        <arg name="unpause" value="true" />
+    </include>
     <test test-name="franka_hw_mujoco_test" pkg="franka_mujoco" type="franka_hw_mujoco_test"/>
 </launch>

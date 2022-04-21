@@ -1,10 +1,6 @@
-<mujoco model="panda">
+<mujocoinclude>
     <option collision="all" timestep="0.001" gravity="0 0 -9.81" cone="elliptic" />
     <compiler angle="radian" />
-
-    <visual>
-        <headlight ambient="0.4 0.4 0.4" diffuse="0.4 0.4 0.4" specular="0.0 0.0 0.0" active="1" />
-    </visual>
 
     <asset>
         <mesh name="link0_collision"  file="meshes/collision/link0.stl"  scale="1 1 1" />
@@ -42,7 +38,7 @@
                 <geom contype="1" conaffinity="1" group="3" type="mesh" rgba=".5 .6 .7 1" />
             </default>
             <default class="panda_finger">
-                <joint damping="100" armature="5" />
+                <joint damping="0.03" armature="5" />
             </default>
         </default>
     </default>
@@ -131,10 +127,36 @@
             </body>
         </body>
     </worldbody>
+    <contact>
+        <exclude body1="panda_link0" body2="panda_link1" />
+        <exclude body1="panda_link0" body2="panda_link2" />
+        <exclude body1="panda_link0" body2="panda_link3" />
+        <exclude body1="panda_link0" body2="panda_link4" />
+
+        <exclude body1="panda_link1" body2="panda_link2" />
+        <exclude body1="panda_link1" body2="panda_link4" />
+
+        <exclude body1="panda_link2" body2="panda_link3" />
+        <exclude body1="panda_link2" body2="panda_link4" />
+
+        <exclude body1="panda_link3" body2="panda_link4" />
+        <exclude body1="panda_link3" body2="panda_link6" />
+
+        <exclude body1="panda_link4" body2="panda_link5" />
+        <exclude body1="panda_link4" body2="panda_link6" />
+        <exclude body1="panda_link4" body2="panda_link7" />
+        <exclude body1="panda_link4" body2="panda_hand" />
+
+        <exclude body1="panda_link5" body2="panda_link7" />
+
+        <exclude body1="panda_link6" body2="panda_link7" />
+
+        <exclude body1="panda_link7" body2="panda_hand" />
+    </contact>
 
 
     <sensor>
         <force name="ee_force_sensor" site="ee_site"/>
         <torque name="ee_torque_sensor" site="ee_site"/>
     </sensor>
-</mujoco>
+</mujocoinclude>
