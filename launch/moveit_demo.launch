@@ -4,12 +4,12 @@
 
     <arg name="load_gripper" default="true" />
     <arg name="transmission" default="effort" />
-    <arg name="paused" default="false" />
 
     <include file="$(find franka_mujoco)/launch/panda.launch" pass_all_args="true">
+        <arg name="verbose"     default="false"  doc="Should more debug output be printed?" />
         <arg name="use_gripper" default="$(arg load_gripper)" />
         <arg name="controller" default="$(arg transmission)_joint_trajectory_controller" />
-        <arg name="unpause" value="$(eval not arg('paused'))" />
+        <arg name="unpause" default="true" />
         <arg name="rviz"     value="false" />
     </include>
 

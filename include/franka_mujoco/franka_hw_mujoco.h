@@ -1,6 +1,66 @@
+/*********************************************************************
+ * Copyright 2017 Franka Emika GmbH
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ *
+ * Changes made for franka_mujoco:
+ *  - namespace
+ *  - FrankaHWSim extends mujoco_ros_control::RobotHWSim instead of gazebo_ros_control::RobotHWSim
+ *  - Interaction with Gazebo has been fully replaced with MuJoCo interaction, but the core functionality stayed the
+ *same.
+ *********************************************************************/
+/*********************************************************************
+ * Software License Agreement (BSD License)
+ *
+ *  Copyright (c) 2022, Bielefeld University
+ *  All rights reserved.
+ *
+ *  Redistribution and use in source and binary forms, with or without
+ *  modification, are permitted provided that the following conditions
+ *  are met:
+ *
+ *   * Redistributions of source code must retain the above copyright
+ *     notice, this list of conditions and the following disclaimer.
+ *   * Redistributions in binary form must reproduce the above
+ *     copyright notice, this list of conditions and the following
+ *     disclaimer in the documentation and/or other materials provided
+ *     with the distribution.
+ *   * Neither the name of Bielefeld University nor the names of its
+ *     contributors may be used to endorse or promote products derived
+ *     from this software without specific prior written permission.
+ *
+ *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ *  "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+ *  LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
+ *  FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
+ *  COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
+ *  INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
+ *  BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+ *  LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+ *  CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+ *  LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
+ *  ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ *  POSSIBILITY OF SUCH DAMAGE.
+ *********************************************************************/
+
+/* Authors: David P. Leins*/
+
 #pragma once
 
 #include <ros/ros.h>
+
+#include <mujoco_ros_control/robot_hw_sim.h>
 
 #include <control_toolbox/pid.h>
 
@@ -48,12 +108,58 @@ namespace franka_mujoco {
  * ### franka_hw/FrankaModelInterface
  *
  */
-class FrankaHWSim : public hardware_interface::RobotHW
+class FrankaHWSim : public mujoco_ros_control::RobotHWSim
 {
 public:
-	FrankaHWSim(ros::NodeHandle &hn);
-	void readSim(ros::Time time, ros::Duration period);
-	void writeSim(ros::Time time, ros::Duration period);
+	/**
+	 * Initialize the simulated robot hardware and parse all supported transmissions.
+	 *
+	 * @param[in] m MuJoCo model handle.
+	 * @param[in] d MuJoCo data handle.
+	 * @param[in] robot_namespace the name of the robot passed inside the rosparam config. Should match the
+	 * `<robotNamespace>` tag from the URDF
+	 * @param[in] model_nh root node handle of the node into which this plugin is loaded (usually
+	 * the mujoco server node)
+	 * @param[in] urdf the parsed URDF which should be added
+	 * @param[in] transmissions a list of transmissions of the model which should be simulated
+	 * @return `true` if initialization succeeds, `false` otherwise
+	 */
+	bool initSim(mjModelPtr m, mjDataPtr d, const std::string &robot_namespace, ros::NodeHandle model_nh,
+	             const urdf::Model *const urdf,
+	             std::vector<transmission_interface::TransmissionInfo> transmissions) override;
+
+	/**
+	 * Fetch data from the MuJoCo simulation and pass it on to the hardware interfaces.
+	 *
+	 * This will e.g. read the joint positions, velocities and efforts and write them out to
+	 * controllers via the
+	 [JointStateInterface](http://docs.ros.org/en/jade/api/hardware_interface/html/c++/classhardware__interface_1_1JointStateInterface.html)
+	and/or `franka_hw::FrankaStateInterface`
+
+	*
+	* @param[in] time   the current (simulated) ROS time
+	* @param[in] period the time step at which the simulation is running
+	*/
+	void readSim(ros::Time time, ros::Duration period) override;
+
+	/**
+	 * Pass the data send from controllers via the hardware interfaces onto the simulation.
+	 *
+	 * This will e.g. write the joint commands (torques or forces) to the corresponding joint in
+	 * MuJoCo in each timestep. These commands are usually sent via an
+	 * [EffortJointInterface](http://docs.ros.org/en/jade/api/hardware_interface/html/c++/classhardware__interface_1_1EffortJointInterface.html)
+	 *
+	 * @param[in] time   the current (simulated) ROS time
+	 * @param[in] period the time step at which the simulation is running
+	 */
+	void writeSim(ros::Time time, ros::Duration period) override;
+
+	/**
+	 * Set the emergency stop state (not yet implemented)
+	 *
+	 * @param[in] active does currently nothing.
+	 */
+	void eStopActive(const bool active) override;
 
 	/**
 	 * Switches the control mode of the robot arm
@@ -84,6 +190,9 @@ public:
 	bool setBodyPoseCB(franka_msgs::SetLoad::Request &req, franka_msgs::SetLoad::Response &rep);
 
 private:
+	mjModelPtr m_ptr_;
+	mjDataPtr d_ptr_;
+
 	bool robot_initialized_;
 
 	std::unique_ptr<ControllerVerifier> verifier_;
@@ -106,14 +215,6 @@ private:
 
 	franka::RobotState robot_state_;
 	std::unique_ptr<franka_hw::ModelBase> model_;
-
-	urdf::Model *urdf_model_ptr_;
-
-	boost::shared_ptr<controller_manager::ControllerManager> cm_;
-
-	std::vector<transmission_interface::TransmissionInfo> transmissions_;
-	std::string robot_namespace_;
-	std::string robot_description_;
 
 	const double kDefaultTauExtLowpassFilter = 1.0; // no filtering per default of tau_ext_hat_filtered
 	double tau_ext_lowpass_filter_;
@@ -141,14 +242,6 @@ private:
 
 	bool readParameters(const ros::NodeHandle &nh, const urdf::Model &urdf);
 	void guessEndEffector(const ros::NodeHandle &nh, const urdf::Model &urdf);
-
-	/// checks if a controller that uses the joints of the arm (not gripper joints) claims a position, velocity or effort
-	/// interface.
-	bool claimsInterface(const hardware_interface::ControllerInfo &info);
-
-	std::string getURDF(const ros::NodeHandle &nh, std::string robot_description);
-	void queueThread();
-	bool initRobot(ros::NodeHandle &nh);
 
 	template <int N>
 	std::array<double, N> readArray(std::string param, std::string name = "")

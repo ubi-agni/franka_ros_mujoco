@@ -2,12 +2,15 @@
 <launch>
 
   <!-- Robot Customization -->
-  <arg name="unpause"     default="false"  doc="Should the simulation be unpaused on start" />
+  <arg name="verbose"     default="false"  doc="Should more debug output be printed?" />
+  <arg name="unpause"     default="false"  doc="Should the simulation be unpaused on start?" />
   <arg name="rviz"        default="true"  doc="Should rviz be spawned?" />
   <arg name="arm_id"      default="panda" doc="Name of the panda robot to spawn" />
   <arg name="use_gripper" default="true"  doc="Should a franka hand be mounted on the flange?" />
   <arg name="controller"  default=" "     doc="Which example controller should be started? (One of {cartesian_impedance,model,force,joint_position,joint_velocity}_example_controller)" />
   <arg name="modelfile"   default="$(find franka_mujoco)/assets/picknplace_world.xml" doc="MuJoCo xml file to load. Should define robot model and world." />
+  <arg name="headless"    default="false" />
+  <arg name="num_sim_steps" default="-1" />
 
   <!-- Since robot position and orientation are defined by the xml file, these option currently do not change the robot position, but should match the position and orientation of the model file -->
   <arg name="x"           default="0"     doc="How far forward to place the base of the robot in [m]?" />
@@ -32,14 +35,15 @@
   <rosparam file="$(find franka_mujoco)/config/sim_controllers.yaml" subst_value="true" />
 
   <env name="ROSCONSOLE_FORMAT" value="[${severity}] [${time}] [${logger}] [${node}]: ${message}"/>
-  <env name="ROSCONSOLE_CONFIG_FILE"
+  <env if="$(arg verbose)" name="ROSCONSOLE_CONFIG_FILE"
        value="$(find franka_mujoco)/config/rosconsole.config"/>
 
-  <node pkg="franka_mujoco" type="franka_mujoco_node" name="franka_mujoco" output="screen" >
+  <node pkg="mujoco_ros" type="mujoco_server" name="mujoco_server" output="screen" >
     <param name="modelfile" type="str"  value="$(arg modelfile)" />
     <param name="unpause"   value="$(arg unpause)" />
-    <param name="arm_id"    type="str"  value="$(arg arm_id)" />
-    <rosparam file="$(find franka_mujoco)/config/initial_joint_positions.yaml" />
+    <param name="visualize" value="$(eval not arg('headless'))" />
+    <param name="num_steps" value="$(arg num_sim_steps)" />
+    <!-- <rosparam file="$(find franka_mujoco)/config/initial_joint_positions.yaml" /> -->
   </node>
 
   <param name="m_ee" value="0.76" if="$(arg use_gripper)" />

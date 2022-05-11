@@ -1,4 +1,4 @@
-<library path="lib/libfranka_gripper_mujoco">
+<library path="lib/libfranka_gripper_sim_mujoco">
 
   <class
       name="franka_mujoco/FrankaGripperMujoco"

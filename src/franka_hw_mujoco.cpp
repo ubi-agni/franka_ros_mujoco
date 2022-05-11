@@ -1,3 +1,61 @@
+/*********************************************************************
+ * Copyright 2017 Franka Emika GmbH
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ *
+ * Changes made for franka_mujoco:
+ *  - namespace
+ *  - FrankaHWSim extends mujoco_ros_control::RobotHWSim instead of gazebo_ros_control::RobotHWSim
+ *  - Interaction with Gazebo has been fully replaced with MuJoCo interaction, but the core functionality stayed the
+ *same.
+ *********************************************************************/
+/*********************************************************************
+ * Software License Agreement (BSD License)
+ *
+ *  Copyright (c) 2022, Bielefeld University
+ *  All rights reserved.
+ *
+ *  Redistribution and use in source and binary forms, with or without
+ *  modification, are permitted provided that the following conditions
+ *  are met:
+ *
+ *   * Redistributions of source code must retain the above copyright
+ *     notice, this list of conditions and the following disclaimer.
+ *   * Redistributions in binary form must reproduce the above
+ *     copyright notice, this list of conditions and the following
+ *     disclaimer in the documentation and/or other materials provided
+ *     with the distribution.
+ *   * Neither the name of Bielefeld University nor the names of its
+ *     contributors may be used to endorse or promote products derived
+ *     from this software without specific prior written permission.
+ *
+ *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ *  "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+ *  LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
+ *  FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
+ *  COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
+ *  INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
+ *  BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+ *  LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+ *  CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+ *  LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
+ *  ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ *  POSSIBILITY OF SUCH DAMAGE.
+ *********************************************************************/
+
+/* Authors: David P. Leins*/
+
 #include <joint_limits_interface/joint_limits_urdf.h>
 #include <boost/algorithm/clamp.hpp>
 
@@ -6,79 +64,39 @@
 #include <franka_example_controllers/pseudo_inversion.h>
 
 #include <franka_mujoco/franka_hw_mujoco.h>
-#include <franka_mujoco/mujoco_sim_proxy.h>
 #include <franka_mujoco/model_kdl.h>
 
+#include <pluginlib/class_list_macros.hpp>
+
 namespace franka_mujoco {
-FrankaHWSim::FrankaHWSim(ros::NodeHandle &nh)
+
+bool FrankaHWSim::initSim(mjModelPtr m, mjDataPtr d, const std::string &robot_namespace, ros::NodeHandle model_nh,
+                          const urdf::Model *const urdf,
+                          std::vector<transmission_interface::TransmissionInfo> transmissions)
 {
-	robot_description_ = "robot_description";
+	m_ptr_ = m;
+	d_ptr_ = d;
 
-	const std::string urdf_string = getURDF(nh, robot_description_);
-	ROS_DEBUG_NAMED("franka_hw_sim", "Parsing URDF for transmissions...");
-	transmission_interface::TransmissionParser::parse(urdf_string, transmissions_);
-
-	urdf::Model urdf_model;
-	urdf_model_ptr_ = urdf_model.initString(urdf_string) ? &urdf_model : NULL;
-
-	if (!initRobot(nh)) {
-		ROS_FATAL_NAMED("franka_hw_sim", "Could not initialize robot simulation interface");
-		return;
-	}
-}
-
-std::string FrankaHWSim::getURDF(const ros::NodeHandle &nh, std::string robot_description)
-{
-	std::string urdf_string;
-
-	// Search on and wait for param server
-	while (urdf_string.empty()) {
-		std::string search_param_name;
-		if (nh.searchParam(robot_description, search_param_name)) {
-			ROS_INFO_ONCE_NAMED("franka_hw_sim", "waiting for URDF in parameter [%s] on parameter server",
-			                    search_param_name.c_str());
-
-			nh.getParam(search_param_name, urdf_string);
-		} else {
-			ROS_INFO_ONCE_NAMED("franka_hw_sim", "waiting for URDF in parameter [%s] on parameter server",
-			                    robot_description.c_str());
-
-			nh.getParam(robot_description, urdf_string);
-		}
-
-		usleep(100000);
-	}
-	ROS_DEBUG_STREAM_NAMED("franka_hw_sim", "Received URDF from parameter server");
-	return urdf_string;
-}
-
-bool FrankaHWSim::initRobot(ros::NodeHandle &nh)
-{
 	robot_initialized_ = false;
 
 	// Default to 'panda' as arm_id
-	nh.param<std::string>("arm_id", arm_id_, "panda");
+	model_nh.param<std::string>("arm_id", arm_id_, "panda");
 	ROS_DEBUG_STREAM_NAMED("franka_hw_sim", "arm_id is '" << arm_id_ << "'");
-	if (arm_id_ != robot_namespace_) {
+	if (arm_id_ != robot_namespace) {
 		ROS_WARN_STREAM_NAMED("franka_hw_sim",
 		                      "Caution: Robot names differ! Read 'arm_id: "
 		                          << arm_id_ << "' from parameter server but URDF defines '<robotNamespace>"
-		                          << robot_namespace_ << "</robotNamespace>. Will use '" << arm_id_ << "!");
+		                          << robot_namespace << "</robotNamespace>. Will use '" << arm_id_ << "!");
 	}
 
-	nh.param<double>("tau_ext_lowpass_filter", tau_ext_lowpass_filter_, kDefaultTauExtLowpassFilter);
+	model_nh.param<double>("tau_ext_lowpass_filter", tau_ext_lowpass_filter_, kDefaultTauExtLowpassFilter);
 	ROS_DEBUG_NAMED("franka_hw_sim", "tau is: %f", tau_ext_lowpass_filter_);
 
-	// Wait for sim to be ready since we need to fetch information from it
-	while (!MujocoSimProxy::isSimReady()) {
-		std::this_thread::sleep_for(std::chrono::milliseconds(10));
-	}
-
-	std::array<double, 3> gravity = MujocoSimProxy::getGravity();
+	std::array<double, 3> gravity = { m_ptr_->opt.gravity[0], m_ptr_->opt.gravity[1], m_ptr_->opt.gravity[2] };
 	ROS_DEBUG_NAMED("franka_hw_sim", "Sim Gravity is: %.2f %.2f %.2f", gravity[0], gravity[1], gravity[2]);
 
 	// Generate list of franka_mujoco::Joint to store all relevant information
-	for (const auto &transmission : transmissions_) {
+	for (const auto &transmission : transmissions) {
 		if (transmission.type_ != "transmission_interface/SimpleTransmission") {
 			continue;
 		}
@@ -95,16 +113,18 @@ bool FrankaHWSim::initRobot(ros::NodeHandle &nh)
 		}
 
 		// Fill a 'joint' struct which holds all nevessary data
-		auto joint  = std::make_shared<franka_mujoco::Joint>();
-		joint->name = transmission.joints_[0].name_;
+		auto joint   = std::make_shared<franka_mujoco::Joint>();
+		joint->name  = transmission.joints_[0].name_;
+		joint->m_ptr = m;
+		joint->d_ptr = d;
 
-		if (urdf_model_ptr_ == NULL) {
+		if (urdf == NULL) {
 			ROS_ERROR_STREAM_NAMED("franka_hw_sim",
 			                       "Could not find any URDF model. Was it loaded on the parameter server?");
 			return false;
 		}
 
-		auto urdf_joint = urdf_model_ptr_->getJoint(joint->name);
+		auto urdf_joint = urdf->getJoint(joint->name);
 		if (!urdf_joint) {
 			ROS_ERROR_STREAM_NAMED("franka_hw_sim", "Could not get joint '"
 			                                            << joint->name
@@ -118,7 +138,7 @@ bool FrankaHWSim::initRobot(ros::NodeHandle &nh)
 		                       "Creating joint " << joint->name << " of transmission type " << transmission.type_);
 		joint->axis = Eigen::Vector3d(urdf_joint->axis.x, urdf_joint->axis.y, urdf_joint->axis.z);
 
-		int id = MujocoSimProxy::jointName2id(joint->name);
+		int id = MujocoSim::jointName2id(m_ptr_.get(), joint->name);
 		if (id == -1) {
 			ROS_ERROR_STREAM_NAMED("franka_hw_sim", "Could not get joint '"
 			                                            << joint->name << "' from MuJoCo model."
@@ -141,7 +161,7 @@ bool FrankaHWSim::initRobot(ros::NodeHandle &nh)
 	}
 
 	// Register all supported command interfaces
-	for (const auto &transmission : transmissions_) {
+	for (const auto &transmission : transmissions) {
 		for (const auto &k_interface : transmission.joints_[0].hardware_interfaces_) {
 			auto joint = joints_[transmission.joints_[0].name_];
 			if (transmission.type_ == "transmission_interface/SimpleTransmission") {
@@ -156,7 +176,7 @@ bool FrankaHWSim::initRobot(ros::NodeHandle &nh)
 				if (k_interface == "hardware_interface/PositionJointInterface") {
 					// Initiate position motion generator (PID controller)
 					control_toolbox::Pid pid;
-					pid.initParam(robot_namespace_ + "/motion_generators/position/gains/" + joint->name);
+					pid.initParam(robot_namespace + "/motion_generators/position/gains/" + joint->name);
 					this->position_pid_controllers_.emplace(joint->name, pid);
 
 					initPositionCommandHandle(joint);
@@ -166,7 +186,7 @@ bool FrankaHWSim::initRobot(ros::NodeHandle &nh)
 				if (k_interface == "hardware_interface/VelocityJointInterface") {
 					// Initiate velocity motion generator (PID controller)
 					control_toolbox::Pid pid_velocity;
-					pid_velocity.initParam(robot_namespace_ + "/motion_generators/velocity/gains/" + joint->name);
+					pid_velocity.initParam(robot_namespace + "/motion_generators/velocity/gains/" + joint->name);
 					this->velocity_pid_controllers_.emplace(joint->name, pid_velocity);
 
 					initVelocityCommandHandle(joint);
@@ -177,7 +197,7 @@ bool FrankaHWSim::initRobot(ros::NodeHandle &nh)
 			if (transmission.type_ == "franka_hw/FrankaStateInterface") {
 				ROS_INFO_STREAM_NAMED("franka_hw_sim", "Found transmission interface '" << transmission.type_ << "'");
 				try {
-					initFrankaStateHandle(arm_id_, *urdf_model_ptr_, transmission);
+					initFrankaStateHandle(arm_id_, *urdf, transmission);
 					continue;
 				} catch (const std::invalid_argument &e) {
 					ROS_ERROR_STREAM_NAMED("franka_hw_sim", e.what());
@@ -188,9 +208,9 @@ bool FrankaHWSim::initRobot(ros::NodeHandle &nh)
 			if (transmission.type_ == "franka_hw/FrankaModelInterface") {
 				ROS_INFO_STREAM_NAMED("franka_hw_sim", "Found transmission interface '" << transmission.type_ << "'");
 				double singularity_threshold;
-				nh.param<double>("singularity_warning_threshold", singularity_threshold, -1);
+				model_nh.param<double>("singularity_warning_threshold", singularity_threshold, -1);
 				try {
-					initFrankaModelHandle(arm_id_, *urdf_model_ptr_, transmission, singularity_threshold);
+					initFrankaModelHandle(arm_id_, *urdf, transmission, singularity_threshold);
 					continue;
 				} catch (const std::invalid_argument &e) {
 					ROS_ERROR_STREAM_NAMED("franka_hw_sim", e.what());
@@ -219,14 +239,14 @@ bool FrankaHWSim::initRobot(ros::NodeHandle &nh)
 
 	// serviceServers.push_back(nh.advertiseService("set_load", setBodyPoseCB, &this));
 
-	serviceServers.push_back(nh.advertiseService("set_EE_frame", &FrankaHWSim::setEEFrameCB, this));
-	serviceServers.push_back(nh.advertiseService("set_k_frame", &FrankaHWSim::setKFrameCB, this));
-	serviceServers.push_back(nh.advertiseService("set_load", &FrankaHWSim::setLoadCB, this));
+	serviceServers.push_back(model_nh.advertiseService("set_EE_frame", &FrankaHWSim::setEEFrameCB, this));
+	serviceServers.push_back(model_nh.advertiseService("set_k_frame", &FrankaHWSim::setKFrameCB, this));
+	serviceServers.push_back(model_nh.advertiseService("set_load", &FrankaHWSim::setLoadCB, this));
 	serviceServers.push_back(
-	    nh.advertiseService("set_force_torque_collision_behavior", &FrankaHWSim::setCollisionBehaviorCB, this));
+	    model_nh.advertiseService("set_force_torque_collision_behavior", &FrankaHWSim::setCollisionBehaviorCB, this));
 
 	verifier_ = std::make_unique<ControllerVerifier>(joints_, arm_id_);
-	return readParameters(nh, *urdf_model_ptr_);
+	return readParameters(model_nh, *urdf);
 }
 
 // bool FrankaHWSim::setBodyPoseCB(franka_msgs::SetLoad::Request &req, franka_msgs::SetLoad::Response &rep) {
@@ -383,9 +403,8 @@ void FrankaHWSim::readSim(ros::Time time, ros::Duration period)
 
 void FrankaHWSim::writeSim(ros::Time time, ros::Duration period)
 {
-	MujocoSimProxy::sim_mtx.lock();
-
-	auto g = model_->gravity(robot_state_, MujocoSimProxy::getGravity());
+	// Update gravity, since it currently can be changed at runtime in mujoco_ros
+	auto g = model_->gravity(robot_state_, { m_ptr_->opt.gravity[0], m_ptr_->opt.gravity[1], m_ptr_->opt.gravity[2] });
 
 	for (auto &pair : joints_) {
 		auto joint = pair.second;
@@ -438,9 +457,8 @@ void FrankaHWSim::writeSim(ros::Time time, ros::Duration period)
 			ROS_WARN_STREAM_NAMED("franka_hw_sim", "Command for " << joint->name << " is not finite, won't send to robot");
 			continue;
 		}
-		MujocoSimProxy::setJointEffort(effort, joint->id);
+		d_ptr_->qfrc_applied[m_ptr_->jnt_dofadr[joint->id]] = effort;
 	}
-	MujocoSimProxy::sim_mtx.unlock();
 }
 
 bool FrankaHWSim::readParameters(const ros::NodeHandle &nh, const urdf::Model &urdf)
@@ -709,4 +727,8 @@ void FrankaHWSim::forControlledJoint(const std::list<hardware_interface::Control
 	}
 }
 
+void FrankaHWSim::eStopActive(bool /* active */) {}
+
 } // namespace franka_mujoco
+
+PLUGINLIB_EXPORT_CLASS(franka_mujoco::FrankaHWSim, mujoco_ros_control::RobotHWSim)
