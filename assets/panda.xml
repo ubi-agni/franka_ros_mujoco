@@ -37,7 +37,7 @@
                 <geom contype="1" conaffinity="1" group="3" type="mesh" rgba=".5 .6 .7 1" />
             </default>
             <default class="panda_finger">
-                <joint damping="0.03" armature="5" />
+                <joint damping="0.03" />
             </default>
         </default>
     </default>
@@ -106,13 +106,13 @@
                                             <geom class="collision" mesh="hand_collision" />
 
                                             <body name="panda_leftfinger" pos="0 0 0.0584" >
-                                                <joint name="panda_finger_joint1" axis="0 1 0" type="slide" range="0 0.04" armature="5" />
+                                                <joint name="panda_finger_joint1" axis="0 1 0" type="slide" range="0 0.04" />
                                                 <geom class="visual"    mesh="finger_visual" />
                                                 <geom class="collision" mesh="finger_collision" />
                                             </body>
 
                                             <body name="panda_rightfinger" pos="0 0 0.0584">
-                                                <joint name="panda_finger_joint2" axis="0 -1 0" type="slide" range="0 0.04" armature="5" />
+                                                <joint name="panda_finger_joint2" axis="0 -1 0" type="slide" range="0 0.04" />
                                                 <geom class="visual"    quat="0 0 0 1" mesh="finger_visual" />
                                                 <geom class="collision" quat="0 0 0 1" mesh="finger_collision" />
                                             </body>
