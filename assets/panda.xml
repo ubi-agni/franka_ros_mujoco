@@ -29,7 +29,6 @@
     <default>
         <default class="panda">
             <joint pos="0 0 0" axis="0 0 1" limited="true" damping="0.003" />
-            <position forcelimited="true" ctrllimited="true" user="1002 40  2001 -0.005 0.005" />
             <default class="visual">
                 <geom contype="0" conaffinity="0" group="0" type="mesh" rgba=".95 .99 .92 1" mass="0" />
             </default>
