@@ -43,7 +43,7 @@
     <param name="unpause"   value="$(arg unpause)" />
     <param name="visualize" value="$(eval not arg('headless'))" />
     <param name="num_steps" value="$(arg num_sim_steps)" />
-    <!-- <rosparam file="$(find franka_mujoco)/config/initial_joint_positions.yaml" /> -->
+    <rosparam file="$(find franka_mujoco)/config/initial_joint_positions.yaml" />
   </node>
 
   <param name="m_ee" value="0.76" if="$(arg use_gripper)" />
