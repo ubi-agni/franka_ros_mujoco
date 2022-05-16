@@ -31,7 +31,7 @@
   <depend>transmission_interface</depend>
   <depend>eigen_conversions</depend>
   <depend>franka_hw</depend>
-  <!-- <depend>franka_msgs</depend> -->
+  <depend>franka_msgs</depend>
   <depend>franka_gripper</depend>
   <depend>franka_example_controllers</depend>
   <depend>kdl_parser</depend>

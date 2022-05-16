@@ -21,7 +21,7 @@ find_package(catkin REQUIRED
     transmission_interface
     franka_hw
     kdl_parser
-    # franka_msgs
+    franka_msgs
     franka_gripper
     franka_example_controllers
     mujoco_ros_control
@@ -49,7 +49,7 @@ catkin_package(
     urdf
     kdl_parser
     franka_hw
-    # franka_msgs
+    franka_msgs
     franka_gripper
     franka_example_controllers
     mujoco_ros_control
