@@ -190,5 +190,27 @@ private:
 	void onMoveGoal(const franka_gripper::MoveGoalConstPtr &goal);
 	void onGraspGoal(const franka_gripper::GraspGoalConstPtr &goal);
 	void onGripperActionGoal(const control_msgs::GripperCommandGoalConstPtr &goal);
+
+	/**
+	 * libfranka-like method to grasp an object with the gripper
+	 *
+	 * @param[in] width  size of the object to grasp. [m]
+	 * @param[in] speed closing speed. [m/s]
+	 * @param[in] force grasping force. [N]
+	 * @param[in] epsilon maximum tolerated deviation between the commanded width and the desired width.
+	 * @return true if the object could be grasped.
+	 * @return false if the object could not be grasped.
+	 */
+	bool grasp(double width, double speed, double force, const franka_gripper::GraspEpsilon &epsilon);
+
+	/**
+	 * libfranka-like method to move the gripper to a certain position.
+	 *
+	 * @param[in] width intended opening width. [m]
+	 * @param[in] speed closing speed. [m/s]
+	 * @return true if the command was successful.
+	 * @return false if the command was not successful.
+	 */
+	bool move(double width, double speed);
 };
 } // namespace franka_mujoco
