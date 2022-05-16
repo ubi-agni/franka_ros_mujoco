@@ -12,7 +12,14 @@
         <geom name="Table" type="box" pos="0.56428 0.000584 0.2099115" size="0.2265785 0.3210245 0.2099115" rgba=".5 .5 .5 1" />
         <geom name="pick_tray" type="box" pos="0.56428 -0.215704 0.419773" size="0.1175175 0.072463 0.01167" rgba=".0 .0 .5 1" />
         <geom name="place_tray" type="box" pos="0.56428 0.215704 0.419773" size="0.1175175 0.072463 0.01167" rgba=".5 .0 .0 1" />
-        <geom name="stone" type="box" pos="0.56428 -0.221972 0.475172" size=".0125 .016 .032" rgba=".5 .5 .5 1" />
+    </worldbody>
+
+    <worldbody>
+        <body name="stone" pos="0.56428 -0.221972 0.475172">
+            <freejoint/>
+            <geom type="box" size=".0125 .016 .032" rgba=".5 .5 .5 1" />
+            <inertial pos="0 0 0" mass="0.08" diaginertia="0.01 0.01 0.01"/>
+        </body>
     </worldbody>
 
 </mujoco>
