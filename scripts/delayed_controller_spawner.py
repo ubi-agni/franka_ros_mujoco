@@ -41,7 +41,7 @@ def main():
             sys.exit(-1)
 
     rospy.loginfo('Waking up. Spawning controller...')
-    node = roslaunch.core.Node(package, node_type, name=node_type, args=args)
+    node = roslaunch.core.Node(package, node_type, name=None, args=args)
     launch = roslaunch.scriptapi.ROSLaunch()
     launch.start()
     launch.launch(node)

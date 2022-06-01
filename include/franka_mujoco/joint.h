@@ -58,6 +58,7 @@
 #pragma once
 
 #include <mujoco_ros/mujoco_sim.h>
+#include <mujoco_ros/common_types.h>
 
 #include <angles/angles.h>
 #include <joint_limits_interface/joint_limits.h>
@@ -96,8 +97,8 @@ public:
 	void update(const ros::Duration &dt);
 
 	/// Handles to MuJoCo model and data
-	mjModelPtr m_ptr;
-	mjDataPtr d_ptr;
+	MujocoSim::mjModelPtr m_ptr;
+	MujocoSim::mjDataPtr d_ptr;
 
 	/// Name of this joint. Should be unique in whole simulation
 	std::string name;

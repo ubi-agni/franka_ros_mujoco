@@ -153,7 +153,8 @@ install(DIRECTORY assets
   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
 )
 
-catkin_install_python(PROGRAMS scripts/delayed_controller_spawner.py
+catkin_install_python(PROGRAMS
+    scripts/delayed_controller_spawner.py
   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
 

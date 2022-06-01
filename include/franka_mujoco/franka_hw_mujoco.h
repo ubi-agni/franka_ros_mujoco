@@ -124,8 +124,8 @@ public:
 	 * @param[in] transmissions a list of transmissions of the model which should be simulated
 	 * @return `true` if initialization succeeds, `false` otherwise
 	 */
-	bool initSim(mjModelPtr m, mjDataPtr d, const std::string &robot_namespace, ros::NodeHandle model_nh,
-	             const urdf::Model *const urdf,
+	bool initSim(MujocoSim::mjModelPtr m, MujocoSim::mjDataPtr d, const std::string &robot_namespace,
+	             ros::NodeHandle model_nh, const urdf::Model *const urdf,
 	             std::vector<transmission_interface::TransmissionInfo> transmissions) override;
 
 	/**
@@ -190,8 +190,8 @@ public:
 	bool setBodyPoseCB(franka_msgs::SetLoad::Request &req, franka_msgs::SetLoad::Response &rep);
 
 private:
-	mjModelPtr m_ptr_;
-	mjDataPtr d_ptr_;
+	MujocoSim::mjModelPtr m_ptr_;
+	MujocoSim::mjDataPtr d_ptr_;
 
 	bool robot_initialized_;
 

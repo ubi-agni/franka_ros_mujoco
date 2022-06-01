@@ -70,8 +70,8 @@
 
 namespace franka_mujoco {
 
-bool FrankaHWSim::initSim(mjModelPtr m, mjDataPtr d, const std::string &robot_namespace, ros::NodeHandle model_nh,
-                          const urdf::Model *const urdf,
+bool FrankaHWSim::initSim(MujocoSim::mjModelPtr m, MujocoSim::mjDataPtr d, const std::string &robot_namespace,
+                          ros::NodeHandle model_nh, const urdf::Model *const urdf,
                           std::vector<transmission_interface::TransmissionInfo> transmissions)
 {
 	m_ptr_ = m;
@@ -176,7 +176,7 @@ bool FrankaHWSim::initSim(mjModelPtr m, mjDataPtr d, const std::string &robot_na
 				if (k_interface == "hardware_interface/PositionJointInterface") {
 					// Initiate position motion generator (PID controller)
 					control_toolbox::Pid pid;
-					pid.initParam(robot_namespace + "/motion_generators/position/gains/" + joint->name);
+					pid.initParam("motion_generators/position/gains/" + joint->name);
 					this->position_pid_controllers_.emplace(joint->name, pid);
 
 					initPositionCommandHandle(joint);
@@ -186,7 +186,7 @@ bool FrankaHWSim::initSim(mjModelPtr m, mjDataPtr d, const std::string &robot_na
 				if (k_interface == "hardware_interface/VelocityJointInterface") {
 					// Initiate velocity motion generator (PID controller)
 					control_toolbox::Pid pid_velocity;
-					pid_velocity.initParam(robot_namespace + "/motion_generators/velocity/gains/" + joint->name);
+					pid_velocity.initParam("motion_generators/velocity/gains/" + joint->name);
 					this->velocity_pid_controllers_.emplace(joint->name, pid_velocity);
 
 					initVelocityCommandHandle(joint);
@@ -393,7 +393,6 @@ bool FrankaHWSim::setCollisionBehaviorCB(franka_msgs::SetForceTorqueCollisionBeh
 
 void FrankaHWSim::readSim(ros::Time time, ros::Duration period)
 {
-	// ROS_INFO_NAMED("mujoco_sim_hw", "Running read sim update");
 	for (const auto &pair : joints_) {
 		auto joint = pair.second;
 		joint->update(period);
