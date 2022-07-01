@@ -290,7 +290,7 @@ void FrankaHWSim::initFrankaStateHandle(const std::string &robot, const urdf::Mo
 			                            "_robot' because" + " the specified joint '" + joint.name_ +
 			                            "' in the <transmission> tag cannot be found in the URDF");
 		}
-		ROS_DEBUG_STREAM_NAMED("franka_hw_sim", "Found joint " << joint.name_ << " to belog to a Panda robot");
+		ROS_DEBUG_STREAM_NAMED("franka_hw_sim", "Found joint " << joint.name_ << " to belong to a Panda robot");
 	}
 	fsi_.registerHandle(franka_hw::FrankaStateHandle(robot + "_robot", robot_state_));
 }
