@@ -138,7 +138,7 @@ bool FrankaHWSim::initSim(MujocoSim::mjModelPtr m, MujocoSim::mjDataPtr d, const
 		                       "Creating joint " << joint->name << " of transmission type " << transmission.type_);
 		joint->axis = Eigen::Vector3d(urdf_joint->axis.x, urdf_joint->axis.y, urdf_joint->axis.z);
 
-		int id = MujocoSim::jointName2id(m_ptr_.get(), joint->name);
+		int id = MujocoSim::jointName2id(m_ptr_.get(), joint->name, robot_namespace);
 		if (id == -1) {
 			ROS_ERROR_STREAM_NAMED("franka_hw_sim", "Could not get joint '"
 			                                            << joint->name << "' from MuJoCo model."
@@ -176,7 +176,7 @@ bool FrankaHWSim::initSim(MujocoSim::mjModelPtr m, MujocoSim::mjDataPtr d, const
 				if (k_interface == "hardware_interface/PositionJointInterface") {
 					// Initiate position motion generator (PID controller)
 					control_toolbox::Pid pid;
-					pid.initParam("motion_generators/position/gains/" + joint->name);
+					pid.initParam(robot_namespace + "/motion_generators/position/gains/" + joint->name);
 					this->position_pid_controllers_.emplace(joint->name, pid);
 
 					initPositionCommandHandle(joint);
@@ -186,7 +186,7 @@ bool FrankaHWSim::initSim(MujocoSim::mjModelPtr m, MujocoSim::mjDataPtr d, const
 				if (k_interface == "hardware_interface/VelocityJointInterface") {
 					// Initiate velocity motion generator (PID controller)
 					control_toolbox::Pid pid_velocity;
-					pid_velocity.initParam("motion_generators/velocity/gains/" + joint->name);
+					pid_velocity.initParam(robot_namespace + "/motion_generators/velocity/gains/" + joint->name);
 					this->velocity_pid_controllers_.emplace(joint->name, pid_velocity);
 
 					initVelocityCommandHandle(joint);
