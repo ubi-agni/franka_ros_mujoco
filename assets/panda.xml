@@ -42,15 +42,7 @@
         </default>
     </default>
 
-    <asset>
-        <texture builtin="checker" height="512" name="texplane" rgb1=".2 .3 .4" rgb2=".1 .15 .2" type="2d" width="512" />
-        <material name="MatPlane" reflectance="0.5" shininess="0.01" specular="0.1" texrepeat="1 1" texture="texplane" texuniform="true" />
-    </asset>
-
     <worldbody>
-        <light pos="0 0 1000" castshadow="false" />
-        <geom name="ground_plane" type="plane" size="5 5 10" material="MatPlane" rgba="1 1 1 1"/>
-
         <body name="panda_link0" childclass="panda">
             <inertial pos="-0.041018 -0.00014 0.049974" mass="0.629769" fullinertia="0.00315 0.00388 0.004285 8.2904E-07 0.00015 8.2299E-06" />
             <geom class="visual"    mesh="link0_visual" />
