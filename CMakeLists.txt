@@ -126,7 +126,7 @@ add_dependencies(franka_gripper_sim_mujoco
 ## Install ##
 #############
 
-install(DIRECTORY include/franka_hw_sim_mujoco/
+install(DIRECTORY include/franka_mujoco/
   DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION}
 )
 
