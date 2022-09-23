@@ -337,15 +337,6 @@ void FrankaGripperMujoco::onHomingGoal(const franka_gripper::HomingGoalConstPtr 
 	franka_gripper::GraspEpsilon eps;
 	eps.inner = tolerance_move_;
 	eps.outer = tolerance_move_;
-	transition(State::MOVING, Config{ .width_desired = 0, .speed_desired = 0.02, .force_desired = 0, .tolerance = eps });
-
-	waitUntilStateChange();
-
-	if (!action_homing_->isActive()) {
-		// Homing Action was interrupted from another action goal callback and already preempted.
-		// Don't try to resend result now
-		return;
-	}
 	transition(State::MOVING,
 	           Config{ .width_desired = kMaxFingerWidth, .speed_desired = 0.02, .force_desired = 0, .tolerance = eps });
 
@@ -416,7 +407,7 @@ void FrankaGripperMujoco::onMoveGoal(const franka_gripper::MoveGoalConstPtr &goa
 	eps.outer = tolerance_move_;
 
 	double width   = finger1_.getPosition() + this->finger2_.getPosition(); // recalculate
-	bool ok        = goal->width - eps.inner < width || width < goal->width + eps.outer;
+	bool ok        = goal->width - eps.inner < width and width < goal->width + eps.outer;
 	result.success = static_cast<decltype(result.success)>(ok);
 	action_move_->setSucceeded(result);
 }

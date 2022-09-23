@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <package format="2">
   <name>franka_mujoco</name>
-  <version>1.0.0</version>
+  <version>1.1.0</version>
   <description>The franka_mujoco package</description>
 
   <maintainer email="dleins@techfak.uni-bielefeld.de">David P. Leins</maintainer>
@@ -37,9 +37,13 @@
   <depend>kdl_parser</depend>
   <depend>mujoco_ros_control</depend>
   <depend>mujoco_ros</depend>
+  <depend>mujoco_ros_msgs</depend>
+  <depend>boost_sml</depend>
 
   <exec_depend>rospy</exec_depend>
   <exec_depend>roslaunch</exec_depend>
+
+  <exec_depend version_gte="0.9.1">franka_description</exec_depend>
 
   <export>
     <controller_interface plugin="${prefix}/franka_gripper_sim_mujoco_plugin.xml" />

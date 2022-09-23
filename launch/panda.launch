@@ -11,6 +11,11 @@
   <arg name="modelfile"   default="$(find franka_mujoco)/assets/picknplace_world.xml" doc="MuJoCo xml file to load. Should define robot model and world." />
   <arg name="headless"    default="false" />
   <arg name="num_sim_steps" default="-1" />
+  <arg name="xacro_args" default="" doc="Additional arguments to pass to panda.urdf.xacro" />
+  <arg name="interactive_marker" default="$(eval arg('controller') == 'cartesian_impedance_example_controller')" doc="Should the interactive marker node be started?" />
+  <arg name="ns" default="" />
+  <arg name="initial_joint_config" default="$(find franka_mujoco)/config/initial_joint_states.yaml" doc="Location of param file containing the initial joint states" />
+  <arg name="mujoco_plugin_config" default="$(find franka_mujoco)/config/default_mjplugin_config.yaml" doc="Location of param file containing the mujoco plugin config" />
 
   <!-- Since robot position and orientation are defined by the xml file, these option currently do not change the robot position, but should match the position and orientation of the model file -->
   <arg name="x"           default="0"     doc="How far forward to place the base of the robot in [m]?" />
@@ -23,16 +28,18 @@
   <param name="/use_sim_time" value="true"/>
 
   <param name="robot_description"
-         command="xacro $(find franka_description)/robots/panda_arm.urdf.xacro
+         command="xacro $(find franka_description)/robots/panda/panda.urdf.xacro
                   gazebo:=true
                   hand:=$(arg use_gripper)
                   arm_id:=$(arg arm_id)
                   xyz:='$(arg x) $(arg y) $(arg z)'
-                  rpy:='$(arg roll) $(arg pitch) $(arg yaw)'">
+                  rpy:='$(arg roll) $(arg pitch) $(arg yaw)'
+                  $(arg xacro_args)">
   </param>
 
   <rosparam file="$(find franka_mujoco)/config/franka_hw_sim.yaml" subst_value="true" />
   <rosparam file="$(find franka_mujoco)/config/sim_controllers.yaml" subst_value="true" />
+  <rosparam file="$(arg mujoco_plugin_config)" subst_value="true" />
 
   <env name="ROSCONSOLE_FORMAT" value="[${severity}] [${time}] [${logger}] [${node}]: ${message}"/>
   <env if="$(arg verbose)" name="ROSCONSOLE_CONFIG_FILE"
@@ -43,7 +50,7 @@
     <param name="unpause"   value="$(arg unpause)" />
     <param name="visualize" value="$(eval not arg('headless'))" />
     <param name="num_steps" value="$(arg num_sim_steps)" />
-    <rosparam file="$(find franka_mujoco)/config/initial_joint_states.yaml" subst_value="true" />
+    <rosparam file="$(arg initial_joint_config)" subst_value="true" />
   </node>
 
   <param name="m_ee" value="0.76" if="$(arg use_gripper)" />
@@ -58,12 +65,12 @@
   />
 
   <!-- spawns the controller after the robot was put into its initial joint pose -->
-  <node pkg="franka_mujoco"
-        type="delayed_controller_spawner.py"
+  <node pkg="controller_manager"
+        type="spawner"
         name="$(arg arm_id)_controller_spawner"
         respawn="false"
         output="screen"
-        args="franka_state_controller $(arg controller)"
+        args="--wait-for initialized franka_state_controller $(arg controller)"
   />
 
   <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher" />
@@ -76,7 +83,7 @@
   <node name="interactive_marker"
         pkg="franka_example_controllers"
         type="interactive_marker.py"
-        if="$(eval arg('controller') == 'cartesian_impedance_example_controller')">
+        if="$(arg interactive_marker)">
     <param name="link_name" value="$(arg arm_id)_link0" />
     <remap to="cartesian_impedance_example_controller/equilibrium_pose" from="equilibrium_pose" />
   </node>

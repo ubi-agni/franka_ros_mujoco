@@ -1,0 +1,15 @@
+<?xml version="1.0"?>
+<launch>
+  <arg name="debug" default="false" doc="Bringup MuJoCo UI during the test?" />
+  <include file="$(find franka_mujoco)/launch/panda.launch">
+    <arg name="controller" value="cartesian_impedance_example_controller"/>
+    <arg name="arm_id" value="panda"/>
+    <arg name="modelfile" value="$(find franka_mujoco)/assets/picknplace_world.xml"/>
+    <arg name="headless" value="$(eval not arg('debug'))"/>
+    <arg name="unpause" value="true" />
+    <arg name="verbose" value="true" />
+    <arg name="initial_joint_config" value="$(find franka_mujoco)/config/initial_joint_states_grasp_ready.yaml" />
+  </include>
+  <test test-name="franka_gripper_sim_mujoco_test_with_object" pkg="franka_mujoco" type="franka_gripper_sim_mujoco_test_with_object"
+        time-limit="600.0"/>
+</launch>

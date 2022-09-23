@@ -28,7 +28,7 @@
         <body name="stone" pos="0.56428 -0.221972 0.475172">
             <freejoint/>
             <geom type="box" size=".0125 .016 .032" rgba=".5 .5 .5 1" />
-            <inertial pos="0 0 0" mass="0.08" diaginertia="0.01 0.01 0.01"/>
+            <inertial pos="0 0 0" mass="0.1024" diaginertia="4.369e-5 4.028e-5 1.407e-5"/>
         </body>
     </worldbody>
 

@@ -61,9 +61,12 @@
 #include <mujoco_ros/common_types.h>
 
 #include <angles/angles.h>
+#include <control_toolbox/pid.h>
+#include <franka/robot_state.h>
 #include <joint_limits_interface/joint_limits.h>
 #include <ros/ros.h>
 #include <Eigen/Dense>
+#include <boost/optional.hpp>
 
 namespace franka_mujoco {
 
@@ -133,8 +136,8 @@ public:
 	double desired_velocity = 0;
 
 	/// Decides whether the joint is doing torque control or if the position or velocity should
-	/// be controlled.
-	ControlMethod control_method = POSITION;
+	/// be controlled, or if the joint is entirely uncontrolled
+	boost::optional<ControlMethod> control_method = boost::none;
 
 	/// The currently acting gravity force or torque acting on this joint in \f$N\f$ or \f$Nm\f$
 	double gravity = 0;
@@ -163,6 +166,53 @@ public:
 	/// isInCollision
 	double collision_threshold = std::numeric_limits<double>::infinity();
 
+	/// Position used as desired position if `control_method` is none
+	double stop_position = 0;
+
+	/**
+	 * Decide what the desired position of this joint is based on:
+	 * 1. If a reflex is present, return `position`
+	 * 2. ...otherwise if the control method is POSITION, return `desired_position`
+	 * 3. ...otherwise if the control method is EFFORT, return `desired_position`
+	 * 4. ...otherwise return `position`
+	 *
+	 * @param[in] mode - the current mode the robot is in
+	 * @return either `position` or `desired_position`
+	 */
+	double getDesiredPosition(const franka::RobotMode &mode) const;
+
+	/**
+	 * Decide what the desired velocity of this joint is based on:
+	 * 1. If a reflex is present, return `acceleration`
+	 * 2. ...otherwise if the control method is EFFORT, return `0`
+	 * 4. ...otherwise return `acceleration`
+	 *
+	 * @param[in] mode - the current mode the robot is in
+	 * @return either `acceleration` or `0`
+	 */
+	double getDesiredVelocity(const franka::RobotMode &mode) const;
+
+	/**
+	 * Decide what the desired acceleration of this joint is based on:
+	 * 1. If a reflex is present, return `acceleration`
+	 * 2. ...otherwise if the control method is EFFORT, return `0`
+	 * 3. ...otherwise return `acceleration`
+	 * @param[in] mode - the current mode the robot is in
+	 * @return either `acceleration` or `0`
+	 */
+	double getDesiredAcceleration(const franka::RobotMode &mode) const;
+
+	/**
+	 * Decide what the desired torque of this joint is based on:
+	 * 1. If a reflex is present, return `0`
+	 * 2. ...otherwise if the control method is not EFFORT, return `0`
+	 * 4. ...otherwise return `command`
+	 *
+	 * @param[in] mode - the current mode the robot is in
+	 * @return either `command` or `0`
+	 */
+	double getDesiredTorque(const franka::RobotMode &mode) const;
+
 	/**
 	 * Get the total link mass of this joint's child
 	 * @return the mass in \f$kg\f$
@@ -180,6 +230,12 @@ public:
 	 * @return `true` if @ref effort > @ref collision_threshold
 	 */
 	bool isInCollision() const;
+
+	/// The PID used for the controller, when in "position" control mode. In other modes these gains are ignored
+	control_toolbox::Pid position_controller;
+
+	/// The PID used for the controller, when in "velocity" control mode. In other modes these gains are ignored
+	control_toolbox::Pid velocity_controller;
 
 private:
 	double lastVelocity     = std::numeric_limits<double>::quiet_NaN();

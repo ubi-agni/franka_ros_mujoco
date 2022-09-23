@@ -21,6 +21,7 @@ find_package(catkin REQUIRED
     transmission_interface
     franka_hw
     kdl_parser
+    boost_sml
     franka_msgs
     franka_gripper
     franka_example_controllers
@@ -48,6 +49,7 @@ catkin_package(
     eigen_conversions
     urdf
     kdl_parser
+    boost_sml
     franka_hw
     franka_msgs
     franka_gripper
@@ -151,11 +153,6 @@ install(DIRECTORY config
 )
 install(DIRECTORY assets
   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
-)
-
-catkin_install_python(PROGRAMS
-    scripts/delayed_controller_spawner.py
-  DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
 
 #############

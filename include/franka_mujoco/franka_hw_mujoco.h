@@ -62,7 +62,7 @@
 
 #include <mujoco_ros_control/robot_hw_sim.h>
 
-#include <control_toolbox/pid.h>
+#include <actionlib/server/simple_action_server.h>
 
 #include <hardware_interface/robot_hw.h>
 #include <hardware_interface/joint_state_interface.h>
@@ -74,21 +74,27 @@
 #include <franka_hw/model_base.h>
 
 #include <franka_hw/services.h>
-#include <franka_msgs/SetEEFrame.h>
-#include <franka_msgs/SetForceTorqueCollisionBehavior.h>
-#include <franka_msgs/SetKFrame.h>
-#include <franka_msgs/SetLoad.h>
 
 #include <urdf/model.h>
 
 #include <franka_mujoco/controller_verifier.h>
 #include <franka_mujoco/joint.h>
+#include <franka_mujoco/statemachine.h>
+
+#include <franka_msgs/ErrorRecoveryAction.h>
+#include <franka_msgs/SetEEFrame.h>
+#include <franka_msgs/SetForceTorqueCollisionBehavior.h>
+#include <franka_msgs/SetKFrame.h>
+#include <franka_msgs/SetLoad.h>
 
 #include <controller_manager/controller_manager.h>
 #include <transmission_interface/transmission_parser.h>
 
 #include <Eigen/Dense>
 #include <boost/optional.hpp>
+#include <boost_sml/sml.hpp>
+
+#include <mutex>
 
 namespace franka_mujoco {
 
@@ -111,6 +117,11 @@ namespace franka_mujoco {
 class FrankaHWSim : public mujoco_ros_control::RobotHWSim
 {
 public:
+	/**
+	 * Create a new FrankaHWSim instance
+	 */
+	FrankaHWSim();
+
 	/**
 	 * Initialize the simulated robot hardware and parse all supported transmissions.
 	 *
@@ -187,8 +198,6 @@ public:
 	bool setCollisionBehaviorCB(franka_msgs::SetForceTorqueCollisionBehavior::Request &req,
 	                            franka_msgs::SetForceTorqueCollisionBehavior::Response &rep);
 
-	bool setBodyPoseCB(franka_msgs::SetLoad::Request &req, franka_msgs::SetLoad::Response &rep);
-
 private:
 	MujocoSim::mjModelPtr m_ptr_;
 	MujocoSim::mjDataPtr d_ptr_;
@@ -203,9 +212,6 @@ private:
 
 	std::map<std::string, std::shared_ptr<franka_mujoco::Joint>> joints_;
 
-	std::map<std::string, control_toolbox::Pid> position_pid_controllers_;
-	std::map<std::string, control_toolbox::Pid> velocity_pid_controllers_;
-
 	hardware_interface::JointStateInterface jsi_;
 	hardware_interface::EffortJointInterface eji_;
 	hardware_interface::PositionJointInterface pji_;
@@ -213,6 +219,7 @@ private:
 	franka_hw::FrankaStateInterface fsi_;
 	franka_hw::FrankaModelInterface fmi_;
 
+	boost::sml::sm<franka_mujoco::StateMachine, boost::sml::thread_safe<std::mutex>> sm_;
 	franka::RobotState robot_state_;
 	std::unique_ptr<franka_hw::ModelBase> model_;
 
@@ -222,7 +229,11 @@ private:
 	std::vector<double> lower_force_thresholds_nominal_;
 	std::vector<double> upper_force_thresholds_nominal_;
 
+	ros::Publisher robot_initialized_pub_;
 	std::vector<ros::ServiceServer> serviceServers;
+	ros::ServiceClient service_controller_list_;
+	ros::ServiceClient service_controller_switch_;
+	std::unique_ptr<actionlib::SimpleActionServer<franka_msgs::ErrorRecoveryAction>> action_recovery_;
 
 	void initFrankaStateHandle(const std::string &robot, const urdf::Model &urdf,
 	                           const transmission_interface::TransmissionInfo &transmission);
@@ -237,11 +248,16 @@ private:
 
 	void initServices();
 
+	void restartControllers();
+
 	void updateRobotState(ros::Time time);
 	void updateRobotStateDynamics();
 
 	bool readParameters(const ros::NodeHandle &nh, const urdf::Model &urdf);
 	void guessEndEffector(const ros::NodeHandle &nh, const urdf::Model &urdf);
+
+	static double positionControl(Joint &joint, double setpoint, const ros::Duration &period);
+	static double velocityControl(Joint &joint, double setpoint, const ros::Duration &period);
 
 	template <int N>
 	std::array<double, N> readArray(std::string param, std::string name = "")
