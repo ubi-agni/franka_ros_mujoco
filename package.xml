@@ -16,12 +16,10 @@
 
   <depend>roscpp</depend>
   <depend>angles</depend>
-  <depend>tf2</depend>
   <depend>tf2_ros</depend>
   <depend>tinyxml</depend>
-  <depend>pluginlib</depend>
+  <build_depend>pluginlib</build_depend>
   <depend>urdf</depend>
-  <depend>message_generation</depend>
   <depend>control_msgs</depend>
   <depend>control_toolbox</depend>
   <depend>controller_manager</depend>
@@ -36,9 +34,9 @@
   <depend>franka_example_controllers</depend>
   <depend>kdl_parser</depend>
   <depend>mujoco_ros_control</depend>
-  <depend>mujoco_ros</depend>
-  <depend>mujoco_ros_msgs</depend>
+  <depend>std_msgs</depend>
   <depend>boost_sml</depend>
+  <test_depend>rostest</test_depend>
 
   <exec_depend>rospy</exec_depend>
   <exec_depend>roslaunch</exec_depend>

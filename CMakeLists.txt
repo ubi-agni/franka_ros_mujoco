@@ -11,12 +11,12 @@ find_package(catkin REQUIRED
     roscpp
     angles
     std_msgs
+    control_msgs
     tf2_ros
     control_toolbox
     controller_manager
     controller_interface
     hardware_interface
-    cmake_modules
     eigen_conversions
     transmission_interface
     franka_hw
@@ -26,13 +26,12 @@ find_package(catkin REQUIRED
     franka_gripper
     franka_example_controllers
     mujoco_ros_control
-    mujoco_ros
+    pluginlib
+    urdf
+    joint_limits_interface
 )
 
-find_package(Franka 0.9.0 QUIET)
-if(NOT Franka_FOUND)
-  find_package(Franka 0.8.0 REQUIRED)
-endif()
+find_package(Franka REQUIRED)
 find_package(Eigen3 REQUIRED)
 find_package(orocos_kdl REQUIRED)
 
@@ -42,7 +41,6 @@ catkin_package(
     angles
     controller_interface
     control_toolbox
-    pluginlib
     hardware_interface
     transmission_interface
     joint_limits_interface
@@ -52,10 +50,11 @@ catkin_package(
     boost_sml
     franka_hw
     franka_msgs
+    control_msgs
+    std_msgs
     franka_gripper
     franka_example_controllers
     mujoco_ros_control
-    mujoco_ros
   INCLUDE_DIRS include
   LIBRARIES
     franka_gripper_sim_mujoco
@@ -70,10 +69,6 @@ catkin_package(
 
 ## Specify additional locations of header files
 ## Your package locations should be listed before other locations
-
-link_directories(
-  ${catkin_LIBRARY_DIRS}
-)
 
 include_directories(
  include
