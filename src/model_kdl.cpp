@@ -139,7 +139,7 @@ std::array<double, 16> ModelKDL::pose(franka::Frame frame, const std::array<doub
 
 	KDL::ChainFkSolverPos_recursive solver(chain);
 
-	kq.data = Eigen::Matrix<double, 7, 1>(q.data());
+	kq.data = Eigen::Matrix<double, 7, 1>::Map(q.data());
 
 	int error = solver.JntToCart(kq, kp, segment(frame));
 	if (error != KDL::SolverI::E_NOERROR) {
@@ -162,7 +162,7 @@ ModelKDL::bodyJacobian(franka::Frame frame, const std::array<double, 7> &q,
 {
 	KDL::JntArray kq;
 	KDL::Jacobian J(7); // NOLINT(readability-identifier-naming)
-	kq.data = Eigen::Matrix<double, 7, 1>(q.data());
+	kq.data = Eigen::Matrix<double, 7, 1>::Map(q.data());
 
 	// Augment the chain with the two virtual frames 'EE' and 'K'
 	KDL::Chain chain = this->chain_; // copy
@@ -205,7 +205,7 @@ ModelKDL::zeroJacobian(franka::Frame frame, const std::array<double, 7> &q,
 {
 	KDL::JntArray kq;
 	KDL::Jacobian J(7); // NOLINT(readability-identifier-naming)
-	kq.data = Eigen::Matrix<double, 7, 1>(q.data());
+	kq.data = Eigen::Matrix<double, 7, 1>::Map(q.data());
 
 	// Augment the chain with the two virtual frames 'EE' and 'K'
 	KDL::Chain chain = this->chain_; // copy
@@ -238,7 +238,7 @@ std::array<double, 49> ModelKDL::mass(const std::array<double, 7> &q,
 {
 	KDL::JntArray kq;
 	KDL::JntSpaceInertiaMatrix M(7); // NOLINT(readability-identifier-naming)
-	kq.data = Eigen::Matrix<double, 7, 1>(q.data());
+	kq.data = Eigen::Matrix<double, 7, 1>::Map(q.data());
 
 	KDL::Chain chain = this->chain_; // copy
 	augmentFrame("load", F_x_Ctotal, m_total, I_total, chain);
@@ -262,8 +262,8 @@ ModelKDL::coriolis(const std::array<double, 7> &q, const std::array<double, 7> &
     const
 {
 	KDL::JntArray kq, kdq, kc(7);
-	kq.data  = Eigen::Matrix<double, 7, 1>(q.data());
-	kdq.data = Eigen::Matrix<double, 7, 1>(dq.data());
+	kq.data  = Eigen::Matrix<double, 7, 1>::Map(q.data());
+	kdq.data = Eigen::Matrix<double, 7, 1>::Map(dq.data());
 
 	KDL::Chain chain = this->chain_; // copy
 	augmentFrame("load", F_x_Ctotal, m_total, I_total, chain);
@@ -287,7 +287,7 @@ ModelKDL::gravity(const std::array<double, 7> &q, double m_total,
 {
 	KDL::JntArray kq, kg(7);
 	KDL::Vector grav(gravity_earth[0], gravity_earth[1], gravity_earth[2]);
-	kq.data = Eigen::Matrix<double, 7, 1>(q.data());
+	kq.data = Eigen::Matrix<double, 7, 1>::Map(q.data());
 
 	KDL::Chain chain = this->chain_; // copy
 	augmentFrame("load", F_x_Ctotal, m_total, { 1, 0, 0, 0, 1, 0, 0, 0, 1 }, chain);
