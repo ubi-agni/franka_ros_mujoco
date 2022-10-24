@@ -1,5 +1,5 @@
 #include "gripper_sim_mujoco_test_setup.h"
-#include <mujoco_ros_msgs/SetModelState.h>
+#include <mujoco_ros_msgs/SetBodyState.h>
 #include <ros/ros.h>
 #include <sensor_msgs/JointState.h>
 
@@ -29,15 +29,16 @@ void GripperSimTestSetup::updateFingerState()
 
 void GripperSimTestSetup::resetStone()
 {
-	ros::ServiceClient service = n.serviceClient<mujoco_ros_msgs::SetModelState>("/mujoco_server/set_model_state");
+	ros::ServiceClient service = n.serviceClient<mujoco_ros_msgs::SetBodyState>("/mujoco_server/set_body_state");
 	service.waitForExistence(ros::Duration(5.0));
-	mujoco_ros_msgs::SetModelState srv;
-	srv.request.model_state.model_name         = "stone";
-	srv.request.model_state.pose.position.x    = 0.56428;
-	srv.request.model_state.pose.position.y    = -0.221972;
-	srv.request.model_state.pose.position.z    = 0.475121;
-	srv.request.model_state.pose.orientation.w = 1.0;
-	srv.request.model_state.reference_frame    = "world";
+	mujoco_ros_msgs::SetBodyState srv;
+	srv.request.state.env_id                  = 0;
+	srv.request.state.name                    = "stone";
+	srv.request.state.pose.pose.position.x    = 0.56428;
+	srv.request.state.pose.pose.position.y    = -0.221972;
+	srv.request.state.pose.pose.position.z    = 0.475121;
+	srv.request.state.pose.pose.orientation.w = 1.0;
+	srv.request.state.pose.header.frame_id    = "world";
 	service.call(srv);
 	if (not srv.response.success) {
 		ROS_ERROR("resetting stone failed");
