@@ -1,6 +1,6 @@
 franka_state_controller:
   type: franka_control/FrankaStateController
-  publish_rate: 30  # [Hz]
+  publish_rate: 50  # [Hz]
   arm_id: $(arg arm_id)
   joint_names:
     - $(arg arm_id)_joint1
