@@ -6,6 +6,7 @@
     <arg name="arm_id" value="panda"/>
     <arg name="modelfile" value="$(find franka_mujoco)/assets/picknplace_world.xml"/>
     <arg name="headless" value="$(eval not arg('debug'))"/>
+    <arg name="rviz" value="$(arg debug)"/>
     <arg name="unpause" value="true" />
     <arg name="verbose" value="true" />
     <arg name="initial_joint_config" value="$(find franka_mujoco)/config/initial_joint_states_grasp_ready.yaml" />

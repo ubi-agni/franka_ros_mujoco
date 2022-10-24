@@ -7,6 +7,7 @@
     <arg name="x" value="-0.5"/>
     <arg name="modelfile" value="$(find franka_mujoco)/assets/picknplace_world.xml"/>
     <arg name="headless" value="$(eval not arg('debug'))"/>
+    <arg name="rviz" value="$(arg debug)"/>
   </include>
   <test test-name="franka_gripper_sim_mujoco_test" pkg="franka_mujoco" type="franka_gripper_sim_mujoco_test" time-limit="600.0"/>
 </launch>
