@@ -81,7 +81,7 @@
 
     <default>
         <default class="panda">
-            <joint pos="0 0 0" axis="0 0 1" limited="true" damping="0.003" />
+            <joint pos="0 0 0" axis="0 0 1" limited="true" damping="0.003" solimplimit="0.9999 0.9999 0.001 1"/>
             <default class="visual">
                 <geom contype="0" conaffinity="0" group="1" type="mesh" mass="0" />
             </default>
@@ -214,28 +214,28 @@
 
                                             <body name="panda_leftfinger" pos="0 0 0.0584" >
                                             <inertial mass="0.015" pos="0 0 0" diaginertia="2.375e-6 2.375e-6 7.5e-7"/>
-                                                <joint name="panda_finger_joint1" axis="0 1 0" type="slide" range="0 0.04" />
-                                                <geom class="visual"    mesh="finger_0_visual" material="off_white"/>
-                                                <geom class="visual"    mesh="finger_1_visual" material="black"/>
-                                                <geom class="collision" mesh="finger_0_visual" />
-                                                <geom class="fingertip_pad_collision_1"/>
-                                                <geom class="fingertip_pad_collision_2"/>
-                                                <geom class="fingertip_pad_collision_3"/>
-                                                <geom class="fingertip_pad_collision_4"/>
-                                                <geom class="fingertip_pad_collision_5"/>
+                                                <joint class="panda_finger" name="panda_finger_joint1" axis="0 1 0" type="slide" range="0 0.04" />
+                                                <geom  class="visual"    mesh="finger_0_visual" material="off_white"/>
+                                                <geom  class="visual"    mesh="finger_1_visual" material="black"/>
+                                                <geom  class="collision" mesh="finger_0_visual" />
+                                                <geom  class="fingertip_pad_collision_1"/>
+                                                <geom  class="fingertip_pad_collision_2"/>
+                                                <geom  class="fingertip_pad_collision_3"/>
+                                                <geom  class="fingertip_pad_collision_4"/>
+                                                <geom  class="fingertip_pad_collision_5"/>
                                             </body>
 
                                             <body name="panda_rightfinger" pos="0 0 0.0584" quat="0 0 0 1">
                                                 <inertial mass="0.015" pos="0 0 0" diaginertia="2.375e-6 2.375e-6 7.5e-7"/>
-                                                <joint name="panda_finger_joint2" axis="0 1 0" type="slide" range="0 0.04" />
-                                                <geom class="visual"    mesh="finger_0_visual" material="off_white"/>
-                                                <geom class="visual"    mesh="finger_1_visual" material="black"/>
-                                                <geom class="collision" mesh="finger_0_visual" />
-                                                <geom class="fingertip_pad_collision_1"/>
-                                                <geom class="fingertip_pad_collision_2"/>
-                                                <geom class="fingertip_pad_collision_3"/>
-                                                <geom class="fingertip_pad_collision_4"/>
-                                                <geom class="fingertip_pad_collision_5"/>
+                                                <joint class="panda_finger" name="panda_finger_joint2" axis="0 1 0" type="slide" range="0 0.04" />
+                                                <geom  class="visual"    mesh="finger_0_visual" material="off_white"/>
+                                                <geom  class="visual"    mesh="finger_1_visual" material="black"/>
+                                                <geom  class="collision" mesh="finger_0_visual" />
+                                                <geom  class="fingertip_pad_collision_1"/>
+                                                <geom  class="fingertip_pad_collision_2"/>
+                                                <geom  class="fingertip_pad_collision_3"/>
+                                                <geom  class="fingertip_pad_collision_4"/>
+                                                <geom  class="fingertip_pad_collision_5"/>
                                             </body>
                                         </body>
                                     </body>
