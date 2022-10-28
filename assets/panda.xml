@@ -285,8 +285,4 @@
         <joint joint1="panda_finger_joint1" joint2="panda_finger_joint2" solimp="0.95 0.99 0.001" solref="0.005 1"/>
     </equality>
 
-    <sensor>
-        <force name="ee_force_sensor" site="ee_site"/>
-        <torque name="ee_torque_sensor" site="ee_site"/>
-    </sensor>
 </mujocoinclude>
