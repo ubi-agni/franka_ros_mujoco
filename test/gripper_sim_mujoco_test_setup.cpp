@@ -2,9 +2,13 @@
 #include <mujoco_ros_msgs/SetBodyState.h>
 #include <ros/ros.h>
 #include <sensor_msgs/JointState.h>
+#include <mujoco_ros/mujoco_sim.h>
 
 void GripperSimTestSetup::SetUp()
 {
+	while (MujocoSim::detail::settings_.loadrequest.load() > 0) {
+		std::this_thread::sleep_for(std::chrono::milliseconds(10));
+	}
 	homing_client =
 	    std::make_unique<actionlib::SimpleActionClient<franka_gripper::HomingAction>>("franka_gripper/homing", true);
 	move_client =
