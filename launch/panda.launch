@@ -16,6 +16,12 @@
   <arg name="ns" default="" />
   <arg name="initial_joint_config" default="$(find franka_mujoco)/config/initial_joint_states.yaml" doc="Location of param file containing the initial joint states" />
   <arg name="mujoco_plugin_config" default="$(find franka_mujoco)/config/default_mjplugin_config.yaml" doc="Location of param file containing the mujoco plugin config" />
+  <arg name="use_sim_time" doc="should mujoco publish its simulation time as ros time?"/>
+  <arg name="wait_for_xml" default="false" doc="Should mujoco_ros wait for an xml in the parameter server?" />
+  <arg name="debug" default="false" doc="Should mujoco_ros be run in gdb?" />
+  <arg name="profile" default="false" doc="Should mujoco_ros be profiled?" />
+  <arg name="realtime" default="1.0" doc="Fraction of desired realtime (0,1]. -1 to run as fast as possible" />
+  <arg name="render_offscreen" default="true" doc="Should camera streams be rendered and published?" />
 
   <!-- Since robot position and orientation are defined by the xml file, these option currently do not change the robot position, but should match the position and orientation of the model file -->
   <arg name="x"           default="0"     doc="How far forward to place the base of the robot in [m]?" />
@@ -25,7 +31,7 @@
   <arg name="pitch"       default="0"     doc="How much to rotate the base of the robot around its Y-axis in [rad]?" />
   <arg name="yaw"         default="0"     doc="How much to rotate the base of the robot around its Z-axis in [rad]?" />
 
-  <param name="/use_sim_time" value="true"/>
+  <param name="/use_sim_time" value="$(arg use_sim_time)"/>
 
   <param name="robot_description"
          command="xacro $(find franka_description)/robots/panda/panda.urdf.xacro
@@ -45,13 +51,47 @@
   <env if="$(arg verbose)" name="ROSCONSOLE_CONFIG_FILE"
        value="$(find franka_mujoco)/config/rosconsole.config"/>
 
-  <node pkg="mujoco_ros" type="mujoco_server" name="mujoco_server" output="screen" >
-    <param name="modelfile" type="str"  value="$(arg modelfile)" />
-    <param name="unpause"   value="$(arg unpause)" />
-    <param name="visualize" value="$(eval not arg('headless'))" />
-    <param name="num_steps" value="$(arg num_sim_steps)" />
-    <rosparam file="$(arg initial_joint_config)" subst_value="true" />
-  </node>
+  <group if="$(arg debug)">
+    <node pkg="mujoco_ros" type="mujoco_server" name="mujoco_server" output="screen" launch-prefix="gdb -ex run --args">
+      <param name="modelfile" type="str"  value="$(arg modelfile)" />
+      <param name="unpause"   value="$(arg unpause)" />
+      <param name="visualize" value="$(eval not arg('headless'))" />
+      <param name="num_steps" value="$(arg num_sim_steps)" />
+      <rosparam file="$(arg initial_joint_config)" subst_value="true" />
+      <param name="wait_for_xml" value="$(arg wait_for_xml)" />
+      <param name="realtime" value="$(arg realtime)" />
+      <param name="render_offscreen" value="$(arg render_offscreen)" />
+    </node>
+  </group>
+
+  <group unless="$(arg debug)">
+    <group if="$(arg profile)">
+      <env name="CPUPROFILE" value="/tmp/profile.out" />
+      <node pkg="mujoco_ros" type="mujoco_server" name="mujoco_server" output="screen" >
+      <!-- <node pkg="mujoco_ros" type="mujoco_server" name="mujoco_server" output="screen" launch-prefix="operf -/-callgraph -/-separate-thread "> -->
+        <param name="modelfile" type="str"  value="$(arg modelfile)" />
+        <param name="unpause"   value="$(arg unpause)" />
+        <param name="visualize" value="$(eval not arg('headless'))" />
+        <param name="num_steps" value="$(arg num_sim_steps)" />
+        <rosparam file="$(arg initial_joint_config)" subst_value="true" />
+        <param name="wait_for_xml" value="$(arg wait_for_xml)" />
+        <param name="realtime" value="$(arg realtime)" />
+        <param name="render_offscreen" value="$(arg render_offscreen)" />
+      </node>
+    </group>
+    <group unless="$(arg profile)">
+      <node pkg="mujoco_ros" type="mujoco_server" name="mujoco_server" output="screen" >
+        <param name="modelfile" type="str"  value="$(arg modelfile)" />
+        <param name="unpause"   value="$(arg unpause)" />
+        <param name="visualize" value="$(eval not arg('headless'))" />
+        <param name="num_steps" value="$(arg num_sim_steps)" />
+        <rosparam file="$(arg initial_joint_config)" subst_value="true" />
+        <param name="wait_for_xml" value="$(arg wait_for_xml)" />
+        <param name="realtime" value="$(arg realtime)" />
+        <param name="render_offscreen" value="$(arg render_offscreen)" />
+      </node>
+    </group>
+  </group>
 
   <param name="m_ee" value="0.76" if="$(arg use_gripper)" />
 
