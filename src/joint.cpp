@@ -61,7 +61,7 @@
 
 namespace franka_mujoco {
 
-void Joint::update(const ros::Duration &dt)
+void Joint::update(const ros::Duration &dt, double position_noise /*= 0.0*/)
 {
 	double pos = d_ptr->qpos[m_ptr->jnt_dofadr[id]];
 
@@ -72,7 +72,7 @@ void Joint::update(const ros::Duration &dt)
 
 		case urdf::Joint::REVOLUTE:
 		case urdf::Joint::CONTINUOUS:
-			position += angles::shortest_angular_distance(position, pos);
+			position += angles::shortest_angular_distance(position, pos + position_noise);
 			break;
 	}
 

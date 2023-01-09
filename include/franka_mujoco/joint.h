@@ -96,8 +96,10 @@ public:
 	/**
 	 * Calculate all members such as accelerations, jerks velocities by differentiation
 	 * @param[in] dt the current time step since last time this method was called
+	 * @param[in] position_noise optional noise to add to the joint position (only if type is continuous or revolute)
+	 * which defaults to 0.0 (Addition of UBI)
 	 */
-	void update(const ros::Duration &dt);
+	void update(const ros::Duration &dt, double position_noise = 0.0);
 
 	/// Handles to MuJoCo model and data
 	MujocoSim::mjModelPtr m_ptr;

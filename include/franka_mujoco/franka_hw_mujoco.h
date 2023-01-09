@@ -61,6 +61,7 @@
 #include <ros/ros.h>
 
 #include <mujoco_ros_control/robot_hw_sim.h>
+#include <mujoco_ros_msgs/SetFloat.h>
 
 #include <actionlib/server/simple_action_server.h>
 
@@ -95,6 +96,8 @@
 #include <boost_sml/sml.hpp>
 
 #include <mutex>
+
+#include <random>
 
 namespace franka_mujoco {
 
@@ -225,6 +228,10 @@ private:
 
 	const double kDefaultTauExtLowpassFilter = 1.0; // no filtering per default of tau_ext_hat_filtered
 	double tau_ext_lowpass_filter_;
+
+	// Addition of UBI: add noise to fetched joint positions
+	std::mt19937 rand_generator = std::mt19937(std::random_device{}());
+	std::shared_ptr<std::normal_distribution<double>> noise_dist;
 
 	std::vector<double> lower_force_thresholds_nominal_;
 	std::vector<double> upper_force_thresholds_nominal_;

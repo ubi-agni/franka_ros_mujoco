@@ -283,6 +283,13 @@ bool FrankaHWSim::initSim(MujocoSim::mjModelPtr m, MujocoSim::mjDataPtr d, const
 		    response.success = true;
 		    return true;
 	    }));
+	serviceServers.push_back(
+	    model_nh.advertiseService<mujoco_ros_msgs::SetFloat::Request, mujoco_ros_msgs::SetFloat::Response>(
+	        "franka_control/set_position_noise_sigma", [&](auto &request, auto &response) {
+		        noise_dist.reset(new std::normal_distribution<double>(0.0, request.value));
+		        response.success = true;
+		        return true;
+	        }));
 
 	service_controller_list_ =
 	    model_nh.serviceClient<controller_manager_msgs::ListControllers>("controller_manager/list_controllers");
@@ -467,7 +474,12 @@ void FrankaHWSim::readSim(ros::Time time, ros::Duration period)
 {
 	for (const auto &pair : joints_) {
 		auto joint = pair.second;
-		joint->update(period);
+
+		if (noise_dist) {
+			joint->update(period, (*noise_dist)(rand_generator));
+		} else {
+			joint->update(period);
+		}
 	}
 	updateRobotState(time);
 }
