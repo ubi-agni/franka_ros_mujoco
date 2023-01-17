@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <package format="2">
   <name>franka_mujoco</name>
-  <version>1.1.0</version>
+  <version>1.2.0</version>
   <description>The franka_mujoco package</description>
 
   <maintainer email="dleins@techfak.uni-bielefeld.de">David P. Leins</maintainer>
@@ -36,7 +36,7 @@
   <depend>mujoco_ros_control</depend>
   <depend>std_msgs</depend>
   <depend>boost_sml</depend>
-  <depend version_gte="1.1.0">mujoco_ros_msgs</depend>
+  <depend version_gte="2.0.0">mujoco_ros_msgs</depend>
   <test_depend>rostest</test_depend>
 
   <exec_depend>rospy</exec_depend>

@@ -23,6 +23,7 @@
   <arg name="realtime" default="1.0" doc="Fraction of desired realtime (0,1]. -1 to run as fast as possible" />
   <arg name="render_offscreen" default="true" doc="Should camera streams be rendered and published?" />
   <arg name="eval_mode" default="false" doc="should mujoco_ros be run in evaluation mode?" />
+  <arg name="admin_hash" default="" doc="Hash to verify critical operations in evaluation mode" />
 
   <!-- Since robot position and orientation are defined by the xml file, these option currently do not change the robot position, but should match the position and orientation of the model file -->
   <arg name="x"           default="0"     doc="How far forward to place the base of the robot in [m]?" />
@@ -63,6 +64,7 @@
       <param name="realtime" value="$(arg realtime)" />
       <param name="render_offscreen" value="$(arg render_offscreen)" />
       <param name="eval_mode" value="$(arg eval_mode)" />
+      <param name="admin_hash"  value="$(arg admin_hash)" />
     </node>
   </group>
 
@@ -80,6 +82,7 @@
         <param name="realtime" value="$(arg realtime)" />
         <param name="render_offscreen" value="$(arg render_offscreen)" />
         <param name="eval_mode" value="$(arg eval_mode)" />
+        <param name="admin_hash"  value="$(arg admin_hash)" />
       </node>
     </group>
     <group unless="$(arg profile)">
@@ -93,6 +96,7 @@
         <param name="realtime" value="$(arg realtime)" />
         <param name="render_offscreen" value="$(arg render_offscreen)" />
         <param name="eval_mode" value="$(arg eval_mode)" />
+        <param name="admin_hash"  value="$(arg admin_hash)" />
       </node>
     </group>
   </group>

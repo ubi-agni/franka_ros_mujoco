@@ -286,6 +286,16 @@ bool FrankaHWSim::initSim(MujocoSim::mjModelPtr m, MujocoSim::mjDataPtr d, const
 	serviceServers.push_back(
 	    model_nh.advertiseService<mujoco_ros_msgs::SetFloat::Request, mujoco_ros_msgs::SetFloat::Response>(
 	        "franka_control/set_position_noise_sigma", [&](auto &request, auto &response) {
+		        if (MujocoSim::detail::settings_.eval_mode) {
+			        ROS_DEBUG_NAMED("franka_hw_sim", "Evaluation mode is active. Checking hash validity");
+			        if (MujocoSim::detail::settings_.admin_hash != request.admin_hash) {
+				        ROS_ERROR_NAMED("franka_hw_sim",
+				                        "Hash mismatch, no permission to change joint position noise distribution!");
+				        response.success = false;
+				        return true;
+			        }
+			        ROS_DEBUG_NAMED("franka_hw_sim", "Hash valid, change authorized.");
+		        }
 		        noise_dist.reset(new std::normal_distribution<double>(0.0, request.value));
 		        response.success = true;
 		        return true;
