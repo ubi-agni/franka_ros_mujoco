@@ -10,6 +10,7 @@
         <arg name="headless" value="$(eval not arg('debug'))"/>
         <arg name="rviz" value="$(arg debug)"/>
         <arg name="use_sim_time" value="true" />
+        <arg name="no_x" value="$(eval not arg('debug'))" />
     </include>
     <test test-name="franka_hw_sim_mujoco_test" pkg="franka_mujoco" type="franka_hw_sim_mujoco_test"/>
 </launch>

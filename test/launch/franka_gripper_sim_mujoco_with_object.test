@@ -9,8 +9,9 @@
     <arg name="rviz" value="$(arg debug)"/>
     <arg name="unpause" value="true" />
     <arg name="verbose" value="true" />
-    <arg name="initial_joint_config" value="$(find franka_mujoco)/config/initial_joint_states_grasp_ready.yaml" />
+    <arg name="initial_joint_states" value="$(find franka_mujoco)/config/initial_joint_states_grasp_ready.yaml" />
     <arg name="use_sim_time" value="true" />
+    <arg name="no_x" value="$(eval not arg('debug'))" />
   </include>
   <test test-name="franka_gripper_sim_mujoco_test_with_object" pkg="franka_mujoco" type="franka_gripper_sim_mujoco_test_with_object"
         time-limit="600.0"/>
