@@ -2,28 +2,17 @@
 <launch>
 
   <!-- Robot Customization -->
-  <arg name="verbose"     default="false"  doc="Should more debug output be printed?" />
-  <arg name="unpause"     default="false"  doc="Should the simulation be unpaused on start?" />
   <arg name="rviz"        default="true"  doc="Should rviz be spawned?" />
   <arg name="arm_id"      default="panda" doc="Name of the panda robot to spawn" />
   <arg name="use_gripper" default="true"  doc="Should a franka hand be mounted on the flange?" />
   <arg name="controller"  default=" "     doc="Which example controller should be started? (One of {cartesian_impedance,model,force,joint_position,joint_velocity}_example_controller)" />
-  <arg name="modelfile"   default="$(find franka_mujoco)/assets/picknplace_world.xml" doc="MuJoCo xml file to load. Should define robot model and world." />
-  <arg name="headless"    default="false" />
-  <arg name="num_sim_steps" default="-1" />
-  <arg name="xacro_args" default="" doc="Additional arguments to pass to panda.urdf.xacro" />
-  <arg name="interactive_marker" default="$(eval arg('controller') == 'cartesian_impedance_example_controller')" doc="Should the interactive marker node be started?" />
-  <arg name="ns" default="" />
-  <arg name="initial_joint_config" default="$(find franka_mujoco)/config/initial_joint_states.yaml" doc="Location of param file containing the initial joint states" />
-  <arg name="mujoco_plugin_config" default="$(find franka_mujoco)/config/default_mjplugin_config.yaml" doc="Location of param file containing the mujoco plugin config" />
+  <arg name="xacro_args"  default=""      doc="Additional arguments to pass to panda.urdf.xacro" />
+
+  <arg name="modelfile"            default="$(find franka_mujoco)/assets/picknplace_world.xml"                     doc="MuJoCo xml file to load. Should define robot model and world." />
+  <arg name="interactive_marker"   default="$(eval arg('controller') == 'cartesian_impedance_example_controller')" doc="Should the interactive marker node be started?" />
+  <arg name="initial_joint_states" default="$(find franka_mujoco)/config/initial_joint_states.yaml"                doc="Location of param file containing the initial joint states" />
+  <arg name="mujoco_plugin_config" default="$(find franka_mujoco)/config/default_mjplugin_config.yaml"             doc="Location of param file containing the mujoco plugin config" />
   <arg name="use_sim_time" doc="should mujoco publish its simulation time as ros time?"/>
-  <arg name="wait_for_xml" default="false" doc="Should mujoco_ros wait for an xml in the parameter server?" />
-  <arg name="debug" default="false" doc="Should mujoco_ros be run in gdb?" />
-  <arg name="profile" default="false" doc="Should mujoco_ros be profiled?" />
-  <arg name="realtime" default="1.0" doc="Fraction of desired realtime (0,1]. -1 to run as fast as possible" />
-  <arg name="render_offscreen" default="true" doc="Should camera streams be rendered and published?" />
-  <arg name="eval_mode" default="false" doc="should mujoco_ros be run in evaluation mode?" />
-  <arg name="admin_hash" default="''" doc="Hash to verify critical operations in evaluation mode" />
 
   <!-- Since robot position and orientation are defined by the xml file, these option currently do not change the robot position, but should match the position and orientation of the model file -->
   <arg name="x"           default="0"     doc="How far forward to place the base of the robot in [m]?" />
@@ -49,54 +38,9 @@
   <rosparam file="$(find franka_mujoco)/config/sim_controllers.yaml" subst_value="true" />
   <rosparam file="$(arg mujoco_plugin_config)" subst_value="true" />
 
-  <env name="ROSCONSOLE_FORMAT" value="[${severity}] [${time}] [${logger}] [${node}]: ${message}"/>
-  <env if="$(arg verbose)" name="ROSCONSOLE_CONFIG_FILE"
-       value="$(find franka_mujoco)/config/rosconsole.config"/>
-
-  <group if="$(arg debug)">
-    <node pkg="mujoco_ros" type="mujoco_server" name="mujoco_server" output="screen" launch-prefix="gdb -ex run --args" args="--admin-hash $(arg admin_hash)" >
-      <param name="modelfile" type="str"  value="$(arg modelfile)" />
-      <param name="unpause"   value="$(arg unpause)" />
-      <param name="visualize" value="$(eval not arg('headless'))" />
-      <param name="num_steps" value="$(arg num_sim_steps)" />
-      <rosparam file="$(arg initial_joint_config)" subst_value="true" />
-      <param name="wait_for_xml" value="$(arg wait_for_xml)" />
-      <param name="realtime" value="$(arg realtime)" />
-      <param name="render_offscreen" value="$(arg render_offscreen)" />
-      <param name="eval_mode" value="$(arg eval_mode)" />
-    </node>
-  </group>
-
-  <group unless="$(arg debug)">
-    <group if="$(arg profile)">
-      <env name="CPUPROFILE" value="/tmp/profile.out" />
-      <node pkg="mujoco_ros" type="mujoco_server" name="mujoco_server" output="screen" args="--admin-hash $(arg admin_hash)" >
-      <!-- <node pkg="mujoco_ros" type="mujoco_server" name="mujoco_server" output="screen" launch-prefix="operf -/-callgraph -/-separate-thread "> -->
-        <param name="modelfile" type="str"  value="$(arg modelfile)" />
-        <param name="unpause"   value="$(arg unpause)" />
-        <param name="visualize" value="$(eval not arg('headless'))" />
-        <param name="num_steps" value="$(arg num_sim_steps)" />
-        <rosparam file="$(arg initial_joint_config)" subst_value="true" />
-        <param name="wait_for_xml" value="$(arg wait_for_xml)" />
-        <param name="realtime" value="$(arg realtime)" />
-        <param name="render_offscreen" value="$(arg render_offscreen)" />
-        <param name="eval_mode" value="$(arg eval_mode)" />
-      </node>
-    </group>
-    <group unless="$(arg profile)">
-      <node pkg="mujoco_ros" type="mujoco_server" name="mujoco_server" output="screen" args="--admin-hash $(arg admin_hash)" >
-        <param name="modelfile" type="str"  value="$(arg modelfile)" />
-        <param name="unpause"   value="$(arg unpause)" />
-        <param name="visualize" value="$(eval not arg('headless'))" />
-        <param name="num_steps" value="$(arg num_sim_steps)" />
-        <rosparam file="$(arg initial_joint_config)" subst_value="true" />
-        <param name="wait_for_xml" value="$(arg wait_for_xml)" />
-        <param name="realtime" value="$(arg realtime)" />
-        <param name="render_offscreen" value="$(arg render_offscreen)" />
-        <param name="eval_mode" value="$(arg eval_mode)" />
-      </node>
-    </group>
-  </group>
+  <include file="$(find mujoco_ros)/launch/launch_server.launch" pass_all_args="true" >
+    <arg name="console_config_file"  value="$(find franka_mujoco)/config/rosconsole.config" />
+  </include>
 
   <param name="m_ee" value="0.76" if="$(arg use_gripper)" />
 

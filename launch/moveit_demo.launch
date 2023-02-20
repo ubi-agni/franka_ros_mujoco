@@ -4,14 +4,11 @@
 
     <arg name="load_gripper" default="true" />
     <arg name="transmission" default="effort" />
+    <arg name="use_sim_time" doc="should mujoco publish its simulation time as ros time?"/>
 
-    <include file="$(find franka_mujoco)/launch/panda.launch" pass_all_args="true">
-        <arg name="verbose"     default="false"  doc="Should more debug output be printed?" />
-        <arg name="use_gripper" default="$(arg load_gripper)" />
-        <arg name="controller" default="$(arg transmission)_joint_trajectory_controller" />
-        <arg name="unpause" default="true" />
-        <arg name="rviz"     value="false" />
-    </include>
+    <param name="/use_sim_time" value="$(arg use_sim_time)"/>
+
+    <include file="$(find franka_mujoco)/launch/panda.launch" pass_all_args="true" />
 
     <!-- <include file="$(find panda_moveit_config)/launch/demo.launch" pass_all_args="true"> -->
     <include file="$(find panda_moveit_config)/launch/demo.launch" pass_all_args="true">
