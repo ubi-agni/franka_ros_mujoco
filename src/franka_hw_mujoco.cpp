@@ -16,14 +16,14 @@
  *
  * Changes made for franka_mujoco:
  *  - namespace
- *  - FrankaHWSim extends mujoco_ros_control::RobotHWSim instead of gazebo_ros_control::RobotHWSim
+ *  - FrankaHWSim extends mujoco_ros::control::RobotHWSim instead of gazebo_ros_control::RobotHWSim
  *  - Interaction with Gazebo has been fully replaced with MuJoCo interaction, but the core functionality stayed the
  *same.
  *********************************************************************/
 /*********************************************************************
  * Software License Agreement (BSD License)
  *
- *  Copyright (c) 2022, Bielefeld University
+ *  Copyright (c) 2023, Bielefeld University
  *  All rights reserved.
  *
  *  Redistribution and use in source and binary forms, with or without
@@ -56,6 +56,8 @@
 
 /* Authors: David P. Leins*/
 
+#include <mujoco_ros/util.h>
+
 #include <joint_limits_interface/joint_limits_urdf.h>
 #include <boost/algorithm/clamp.hpp>
 
@@ -81,12 +83,13 @@ using boost::sml::state;
 
 FrankaHWSim::FrankaHWSim() : sm_(this->robot_state_, this->joints_) {}
 
-bool FrankaHWSim::initSim(MujocoSim::mjModelPtr m, MujocoSim::mjDataPtr d, const std::string &robot_namespace,
-                          ros::NodeHandle model_nh, const urdf::Model *const urdf,
+bool FrankaHWSim::initSim(mujoco_ros::mjModelPtr m, mujoco_ros::mjDataPtr d, mujoco_ros::MujocoEnvPtr mujoco_env_ptr,
+                          const std::string &robot_namespace, ros::NodeHandle model_nh, const urdf::Model *const urdf,
                           std::vector<transmission_interface::TransmissionInfo> transmissions)
 {
-	m_ptr_ = m;
-	d_ptr_ = d;
+	m_ptr_          = m;
+	d_ptr_          = d;
+	mujoco_env_ptr_ = mujoco_env_ptr;
 
 	robot_initialized_ = false;
 
@@ -175,7 +178,7 @@ bool FrankaHWSim::initSim(MujocoSim::mjModelPtr m, MujocoSim::mjDataPtr d, const
 		                       "Creating joint " << joint->name << " of transmission type " << transmission.type_);
 		joint->axis = Eigen::Vector3d(urdf_joint->axis.x, urdf_joint->axis.y, urdf_joint->axis.z);
 
-		int id = MujocoSim::jointName2id(m_ptr_.get(), joint->name, robot_namespace);
+		int id = mujoco_ros::util::jointName2id(m_ptr_.get(), joint->name, robot_namespace);
 		if (id == -1) {
 			ROS_ERROR_STREAM_NAMED("franka_hw_sim", "Could not get joint '"
 			                                            << joint->name << "' from MuJoCo model."
@@ -286,9 +289,9 @@ bool FrankaHWSim::initSim(MujocoSim::mjModelPtr m, MujocoSim::mjDataPtr d, const
 	serviceServers.push_back(
 	    model_nh.advertiseService<mujoco_ros_msgs::SetFloat::Request, mujoco_ros_msgs::SetFloat::Response>(
 	        "franka_control/set_position_noise_sigma", [&](auto &request, auto &response) {
-		        if (MujocoSim::detail::settings_.eval_mode) {
+		        if (mujoco_env_ptr_->settings_.eval_mode) {
 			        ROS_DEBUG_NAMED("franka_hw_sim", "Evaluation mode is active. Checking hash validity");
-			        if (MujocoSim::detail::settings_.admin_hash != request.admin_hash) {
+			        if (mujoco_env_ptr_->settings_.admin_hash != request.admin_hash) {
 				        ROS_ERROR_NAMED("franka_hw_sim",
 				                        "Hash mismatch, no permission to change joint position noise distribution!");
 				        response.success = false;
@@ -825,4 +828,4 @@ void FrankaHWSim::eStopActive(bool /* active */) {}
 
 } // namespace franka_mujoco
 
-PLUGINLIB_EXPORT_CLASS(franka_mujoco::FrankaHWSim, mujoco_ros_control::RobotHWSim)
+PLUGINLIB_EXPORT_CLASS(franka_mujoco::FrankaHWSim, mujoco_ros::control::RobotHWSim)

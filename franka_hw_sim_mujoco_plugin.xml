@@ -3,7 +3,7 @@
   <class
       name="franka_mujoco/FrankaHWSim"
       type="franka_mujoco::FrankaHWSim"
-      base_class_type="mujoco_ros_control::RobotHWSim">
+      base_class_type="mujoco_ros::control::RobotHWSim">
       <description>
           A custom implementation of a mujoco_ros_control plugin, which is able to simulate franka interfaces in MuJoCo.
       </description>

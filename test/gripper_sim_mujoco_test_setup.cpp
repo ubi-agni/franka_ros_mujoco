@@ -1,13 +1,19 @@
 #include "gripper_sim_mujoco_test_setup.h"
 #include <mujoco_ros_msgs/SetBodyState.h>
+#include <mujoco_ros_msgs/GetStateUint.h>
 #include <ros/ros.h>
 #include <sensor_msgs/JointState.h>
-#include <mujoco_ros/mujoco_sim.h>
+#include <thread>
 
 void GripperSimTestSetup::SetUp()
 {
-	while (MujocoSim::detail::settings_.loadrequest.load() > 0) {
+	ros::ServiceClient service =
+	    n.serviceClient<mujoco_ros_msgs::GetStateUint>("/mujoco_server/get_loading_request_state");
+	mujoco_ros_msgs::GetStateUint srv;
+	ASSERT_TRUE(service.call(srv)) << "Could not get loading request state";
+	while (srv.response.state.value > 0) {
 		std::this_thread::sleep_for(std::chrono::milliseconds(10));
+		ASSERT_TRUE(service.call(srv));
 	}
 	homing_client =
 	    std::make_unique<actionlib::SimpleActionClient<franka_gripper::HomingAction>>("franka_gripper/homing", true);
@@ -36,7 +42,6 @@ void GripperSimTestSetup::resetStone()
 	ros::ServiceClient service = n.serviceClient<mujoco_ros_msgs::SetBodyState>("/mujoco_server/set_body_state");
 	service.waitForExistence(ros::Duration(5.0));
 	mujoco_ros_msgs::SetBodyState srv;
-	srv.request.state.env_id                  = 0;
 	srv.request.state.name                    = "stone";
 	srv.request.state.pose.pose.position.x    = 0.56428;
 	srv.request.state.pose.pose.position.y    = -0.221972;

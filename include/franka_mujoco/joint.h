@@ -22,7 +22,7 @@
 /*********************************************************************
  * Software License Agreement (BSD License)
  *
- *  Copyright (c) 2022, Bielefeld University
+ *  Copyright (c) 2023, Bielefeld University
  *  All rights reserved.
  *
  *  Redistribution and use in source and binary forms, with or without
@@ -57,7 +57,7 @@
 
 #pragma once
 
-#include <mujoco_ros/mujoco_sim.h>
+#include <mujoco_ros/mujoco_env.h>
 #include <mujoco_ros/common_types.h>
 
 #include <angles/angles.h>
@@ -102,8 +102,8 @@ public:
 	void update(const ros::Duration &dt, double position_noise = 0.0);
 
 	/// Handles to MuJoCo model and data
-	MujocoSim::mjModelPtr m_ptr;
-	MujocoSim::mjDataPtr d_ptr;
+	mujoco_ros::mjModelPtr m_ptr;
+	mujoco_ros::mjDataPtr d_ptr;
 
 	/// Name of this joint. Should be unique in whole simulation
 	std::string name;
