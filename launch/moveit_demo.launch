@@ -8,7 +8,10 @@
 
     <param name="/use_sim_time" value="$(arg use_sim_time)"/>
 
-    <include file="$(find franka_mujoco)/launch/panda.launch" pass_all_args="true" />
+    <include file="$(find franka_mujoco)/launch/panda.launch" pass_all_args="true">
+        <arg name="rviz" value="false" />
+        <arg name="controller" default="$(arg transmission)_joint_trajectory_controller" />
+    </include>
 
     <!-- <include file="$(find panda_moveit_config)/launch/demo.launch" pass_all_args="true"> -->
     <include file="$(find panda_moveit_config)/launch/demo.launch" pass_all_args="true">
