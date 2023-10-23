@@ -83,12 +83,12 @@ using boost::sml::state;
 
 FrankaHWSim::FrankaHWSim() : sm_(this->robot_state_, this->joints_) {}
 
-bool FrankaHWSim::initSim(mujoco_ros::mjModelPtr m, mujoco_ros::mjDataPtr d, mujoco_ros::MujocoEnvPtr mujoco_env_ptr,
+bool FrankaHWSim::initSim(const mjModel *m_ptr, mjData *d_ptr, mujoco_ros::MujocoEnv *mujoco_env_ptr,
                           const std::string &robot_namespace, ros::NodeHandle model_nh, const urdf::Model *const urdf,
                           std::vector<transmission_interface::TransmissionInfo> transmissions)
 {
-	m_ptr_          = m;
-	d_ptr_          = d;
+	m_ptr_          = m_ptr;
+	d_ptr_          = d_ptr;
 	mujoco_env_ptr_ = mujoco_env_ptr;
 
 	robot_initialized_ = false;
@@ -155,8 +155,8 @@ bool FrankaHWSim::initSim(mujoco_ros::mjModelPtr m, mujoco_ros::mjDataPtr d, muj
 		// Fill a 'joint' struct which holds all nevessary data
 		auto joint   = std::make_shared<franka_mujoco::Joint>();
 		joint->name  = transmission.joints_[0].name_;
-		joint->m_ptr = m;
-		joint->d_ptr = d;
+		joint->m_ptr = m_ptr;
+		joint->d_ptr = d_ptr;
 
 		if (urdf == NULL) {
 			ROS_ERROR_STREAM_NAMED("franka_hw_sim",
@@ -178,7 +178,7 @@ bool FrankaHWSim::initSim(mujoco_ros::mjModelPtr m, mujoco_ros::mjDataPtr d, muj
 		                       "Creating joint " << joint->name << " of transmission type " << transmission.type_);
 		joint->axis = Eigen::Vector3d(urdf_joint->axis.x, urdf_joint->axis.y, urdf_joint->axis.z);
 
-		int id = mujoco_ros::util::jointName2id(m_ptr_.get(), joint->name, robot_namespace);
+		int id = mujoco_ros::util::jointName2id(const_cast<mjModel *>(m_ptr_), joint->name, robot_namespace);
 		if (id == -1) {
 			ROS_ERROR_STREAM_NAMED("franka_hw_sim", "Could not get joint '"
 			                                            << joint->name << "' from MuJoCo model."
@@ -756,7 +756,7 @@ void FrankaHWSim::updateRobotState(ros::Time time)
 	Eigen::VectorXd::Map(&robot_state_.O_F_ext_hat_K[0], 6) = f_ext_0;
 	Eigen::VectorXd::Map(&robot_state_.K_F_ext_hat_K[0], 6) = f_ext_k;
 
-	for (int i = 0; i < robot_state_.cartesian_contact.size(); i++) {
+	for (size_t i = 0; i < robot_state_.cartesian_contact.size(); i++) {
 		// Evaluate the cartesian contact/collisions in K frame
 		double fi                           = std::abs(f_ext_k(i));
 		robot_state_.cartesian_contact[i]   = static_cast<double>(fi > lower_force_thresholds_nominal_.at(i));

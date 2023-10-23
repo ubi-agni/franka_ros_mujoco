@@ -130,7 +130,7 @@ public:
 	 *
 	 * @param[in] m MuJoCo model handle.
 	 * @param[in] d MuJoCo data handle.
-	 * @param[in] mujoco_env_ptr Handle to (const) parent environment.
+	 * @param[in] mujoco_env_ptr Handle to parent environment.
 	 * @param[in] robot_namespace the name of the robot passed inside the rosparam config. Should match the
 	 * `<robotNamespace>` tag from the URDF
 	 * @param[in] model_nh root node handle of the node into which this plugin is loaded (usually
@@ -139,7 +139,7 @@ public:
 	 * @param[in] transmissions a list of transmissions of the model which should be simulated
 	 * @return `true` if initialization succeeds, `false` otherwise
 	 */
-	bool initSim(mujoco_ros::mjModelPtr m, mujoco_ros::mjDataPtr d, mujoco_ros::MujocoEnvPtr mujoco_env_ptr,
+	bool initSim(const mjModel *m_ptr, mjData *d, mujoco_ros::MujocoEnv *mujoco_env_ptr,
 	             const std::string &robot_namespace, ros::NodeHandle model_nh, const urdf::Model *const urdf,
 	             std::vector<transmission_interface::TransmissionInfo> transmissions) override;
 
@@ -203,9 +203,9 @@ public:
 	                            franka_msgs::SetForceTorqueCollisionBehavior::Response &rep);
 
 private:
-	mujoco_ros::mjModelPtr m_ptr_;
-	mujoco_ros::mjDataPtr d_ptr_;
-	mujoco_ros::MujocoEnvPtr mujoco_env_ptr_;
+	const mjModel *m_ptr_;
+	mjData *d_ptr_;
+	mujoco_ros::MujocoEnv *mujoco_env_ptr_;
 
 	bool robot_initialized_;
 

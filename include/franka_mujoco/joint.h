@@ -102,8 +102,8 @@ public:
 	void update(const ros::Duration &dt, double position_noise = 0.0);
 
 	/// Handles to MuJoCo model and data
-	mujoco_ros::mjModelPtr m_ptr;
-	mujoco_ros::mjDataPtr d_ptr;
+	const mjModel *m_ptr;
+	mjData *d_ptr;
 
 	/// Name of this joint. Should be unique in whole simulation
 	std::string name;

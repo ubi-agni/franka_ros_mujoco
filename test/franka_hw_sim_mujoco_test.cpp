@@ -429,7 +429,7 @@ TEST_F(FrankaHWSimFixture, pressing_user_stop_stops_the_arm_joints)
 		// A little while later we check if the joints are still moving
 		auto msg = ros::topic::waitForMessage<sensor_msgs::JointState>("/joint_states", *nh, timeout);
 		ASSERT_TRUE(msg != nullptr) << "No message on /joint_states received within " << timeout.toSec() << "s";
-		for (int i = 0; i < msg->name.size(); i++) {
+		for (size_t i = 0; i < msg->name.size(); i++) {
 			auto name = msg->name.at(i);
 			if (contains(name, "finger_joint")) {
 				continue;
@@ -491,7 +491,7 @@ TEST_F(FrankaHWSimFixture, pressing_user_stop_lets_finger_joints_still_move)
 		auto msg = ros::topic::waitForMessage<sensor_msgs::JointState>("/franka_gripper/joint_states", *nh, timeout);
 		ASSERT_TRUE(msg != nullptr) << "No message on /franka_gripper/joint_states received within " << timeout.toSec()
 		                            << "s";
-		for (int i = 0; i < msg->name.size(); i++) {
+		for (size_t i = 0; i < msg->name.size(); i++) {
 			auto name = msg->name.at(i);
 			if (not contains(name, "finger_joint")) {
 				continue;
