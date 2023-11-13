@@ -1,6 +1,8 @@
 <?xml version="1.0"?>
 <launch>
 
+  <arg name="urdf" default="$(find franka_description)/robots/panda/panda.urdf.xacro"/>
+
   <!-- Robot Customization -->
   <arg name="rviz"        default="true"  doc="Should rviz be spawned?" />
   <arg name="arm_id"      default="panda" doc="Name of the panda robot to spawn" />
@@ -31,7 +33,7 @@
   <param name="/use_sim_time" value="$(arg use_sim_time)"/>
 
   <param name="robot_description"
-         command="xacro $(find franka_description)/robots/panda/panda.urdf.xacro
+         command="xacro $(arg urdf)
                   gazebo:=true
                   hand:=$(arg use_gripper)
                   arm_id:=$(arg arm_id)
