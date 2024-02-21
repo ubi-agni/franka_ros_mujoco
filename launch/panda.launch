@@ -2,6 +2,7 @@
 <launch>
 
   <arg name="urdf" default="$(find franka_description)/robots/panda/panda.urdf.xacro"/>
+  <arg name="standalone"  default="true"  doc="Should a mujoco server instance be started?" />
   <arg name="sim_hw_file" default="$(find franka_mujoco)/config/franka_hw_sim.yaml"  doc="Path to sim hardware interface configuration" />
   <arg name="sim_controllers_file" default="$(find franka_mujoco)/config/sim_controllers.yaml"  doc="Path to sim controller definitions" />
 
@@ -45,11 +46,14 @@
   </param>
 
   <rosparam file="$(arg sim_hw_file)" subst_value="true" />
-
-  <include file="$(find mujoco_ros)/launch/launch_server.launch" pass_all_args="true" >
-    <arg name="console_config_file"  value="$(find franka_mujoco)/config/rosconsole.config" />
-  </include>
   <rosparam file="$(arg sim_controllers_file)" subst_value="true" />
+
+  <group if="$(arg standalone)">
+    <rosparam file="$(arg mujoco_plugin_config)" subst_value="true" />
+    <include file="$(find mujoco_ros)/launch/launch_server.launch" pass_all_args="true" >
+      <arg name="console_config_file"  value="$(find franka_mujoco)/config/rosconsole.config" />
+    </include>
+  </group>
 
   <param name="m_ee" value="0.76" if="$(arg use_gripper)" />
 
