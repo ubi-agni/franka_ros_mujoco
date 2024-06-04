@@ -38,6 +38,7 @@ find_package(catkin REQUIRED
     franka_msgs
     franka_gripper
     franka_example_controllers
+    mujoco_ros
     mujoco_ros_control
     pluginlib
     urdf
@@ -67,6 +68,7 @@ catkin_package(
     std_msgs
     franka_gripper
     franka_example_controllers
+    mujoco_ros
     mujoco_ros_control
   INCLUDE_DIRS include
   LIBRARIES
