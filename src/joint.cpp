@@ -63,7 +63,7 @@ namespace franka_mujoco {
 
 void Joint::update(const ros::Duration &dt, double position_noise /*= 0.0*/)
 {
-	double pos = d_ptr->qpos[m_ptr->jnt_dofadr[id]];
+	double pos = d_ptr->qpos[m_ptr->jnt_qposadr[id]];
 
 	switch (type) {
 		case urdf::Joint::PRISMATIC:
