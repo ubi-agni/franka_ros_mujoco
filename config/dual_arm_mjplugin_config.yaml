@@ -1,0 +1,11 @@
+MujocoPlugins:
+  - type: mujoco_ros_control/MujocoRosControlPlugin
+    hardware:
+      type: franka_mujoco/FrankaHWSim
+      control_period: 0.001
+    robot_namespace: $(arg arm_id_0)
+  - type: mujoco_ros_control/MujocoRosControlPlugin
+    hardware:
+      type: franka_mujoco/FrankaHWSim
+      control_period: 0.001
+    robot_namespace: $(arg arm_id_1)

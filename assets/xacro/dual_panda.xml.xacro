@@ -1,0 +1,46 @@
+<?xml version="1.0"?>
+<mujoco xmlns:xacro="http://ros.org/wiki/xacro" model="Dual Panda Scene">
+    <option timestep="0.001" gravity="0 0 -9.81" cone="elliptic" />
+    <size njmax="500" nconmax="100" />
+    <compiler angle="radian" />
+
+    <xacro:arg name="x0" default="0" />
+    <xacro:arg name="y0" default="0" />
+    <xacro:arg name="z0" default="0" />
+    <xacro:arg name="roll0" default="0" />
+    <xacro:arg name="pitch0" default="0" />
+    <xacro:arg name="yaw0" default="0" />
+    <xacro:arg name="x1" default="0" />
+    <xacro:arg name="y1" default="0" />
+    <xacro:arg name="z1" default="0" />
+    <xacro:arg name="roll1" default="0" />
+    <xacro:arg name="pitch1" default="0" />
+    <xacro:arg name="yaw1" default="0" />
+
+    <!-- Adds Panda Assets and Default Classes and Macro Definitions -->
+    <xacro:include filename="$(find franka_mujoco)/assets/xacro/panda.mujoco.xacro" />
+
+    <visual>
+        <headlight ambient="0.4 0.4 0.4" diffuse="0.4 0.4 0.4" specular="0.0 0.0 0.0" active="1" />
+    </visual>
+
+    <asset>
+        <texture builtin="checker" height="512" name="texplane" rgb1=".2 .3 .4" rgb2=".1 .15 .2" type="2d" width="512" />
+        <material name="MatPlane" reflectance="0.05" shininess="0.01" specular="0.01" texrepeat="1 1" texture="texplane" texuniform="true" />
+    </asset>
+
+    <worldbody>
+        <light pos="0 0 1000" castshadow="false" />
+        <geom name="ground_plane" type="plane" size="5 5 10" material="MatPlane" rgba="1 1 1 1"/>
+    </worldbody>
+
+    <worldbody>
+        <xacro:panda_robot name="$(arg arm_id_0)" pos="$(arg x0) $(arg y0) $(arg z0)" rot="$(arg roll0) $(arg pitch0) $(arg yaw0)" />
+        <xacro:panda_robot name="$(arg arm_id_1)" pos="$(arg x1) $(arg y1) $(arg z1)" rot="$(arg roll1) $(arg pitch1) $(arg yaw1)" />
+    </worldbody>
+
+    <!-- Exclude Impossible Self Collision, Add Finger Coupling (Tendon, Equality Constraint) -->
+    <xacro:panda_extra name="$(arg arm_id_0)" />
+    <xacro:panda_extra name="$(arg arm_id_1)" />
+
+</mujoco>

@@ -1,0 +1,65 @@
+<?xml version="1.0"?>
+<mujoco xmlns:xacro="http://ros.org/wiki/xacro" model="Panda Scene">
+
+    <xacro:arg name="name" default="panda" />
+    <xacro:arg name="on_table" default="false" />
+
+    <!-- Adds Panda Assets and Default Classes and Macro Definitions -->
+    <xacro:include filename="$(find franka_mujoco)/assets/xacro/panda.mujoco.xacro" />
+
+    <compiler angle="radian" autolimits="false" />
+    <size njmax="500" nconmax="100" />
+    <option timestep="0.001" gravity="0 0 -9.81" cone="elliptic" />
+
+    <visual>
+        <headlight ambient="0.4 0.4 0.4" diffuse="0.4 0.4 0.4" specular="0.0 0.0 0.0" active="1" />
+    </visual>
+
+    <asset>
+        <texture builtin="checker" height="512" name="texplane" rgb1=".2 .3 .4" rgb2=".1 .15 .2"
+            type="2d" width="512" />
+        <material name="MatPlane" reflectance="0.05" shininess="0.01" specular="0.01"
+            texrepeat="1 1" texture="texplane" texuniform="true" />
+    </asset>
+
+
+    <worldbody>
+        <light pos="0 0 1000" castshadow="false" />
+        <geom name="ground_plane" type="plane" size="5 5 10" material="MatPlane" rgba="1 1 1 1" />
+    </worldbody>
+
+    <worldbody>
+        <body name="stone" pos="0.56428 -0.221972 0.475172">
+            <freejoint/>
+            <geom type="box" size=".0125 .016 .032" rgba=".5 .5 .5 1" />
+            <inertial pos="0 0 0" mass="0.1024" diaginertia="4.369e-5 4.028e-5 1.407e-5"/>
+        </body>
+    </worldbody>
+
+    <!-- Panda Robot (must be rooted in worldbody or other body) -->
+    <worldbody>
+        <!-- Not on table => rooted to worldbody (origin) -->
+        <xacro:unless value="$(arg on_table)">
+            <xacro:panda_robot name="$(arg name)" pos="$(arg x) $(arg y) $(arg z)"
+                rot="$(arg roll) $(arg pitch) $(arg yaw)" />
+        </xacro:unless>
+
+        <!-- Rooted on a table -->
+        <xacro:if value="$(arg on_table)">
+            <body pos="0.56428 0 0">
+                <geom name="Table" type="box" pos="0 0 0.2099115"
+                    size="0.2265785 0.3210245 0.2099115" rgba=".5 .5 .5 1" />
+                <geom name="pick_tray" type="box" pos="0 -0.215704 0.419773"
+                    size="0.1175175 0.072463 0.01167" rgba=".0 .0 .5 1" />
+                <geom name="place_tray" type="box" pos="0 0.215704 0.419773"
+                    size="0.1175175 0.072463 0.01167" rgba=".5 .0 .0 1" />
+
+                <body pos="0 0 ${0.2099115*2}">
+                    <xacro:panda_robot name="$(arg name)" pos="$(arg x) $(arg y) $(arg z)"
+                        rot="$(arg roll) $(arg pitch) $(arg yaw)" />
+                </body>
+            </body>
+        </xacro:if>
+    </worldbody>
+
+</mujoco>

@@ -1,0 +1,104 @@
+<?xml version="1.0"?>
+<launch>
+
+  <arg name="urdf" default="$(find franka_description)/robots/panda/panda.urdf.xacro"/>
+  <arg name="standalone"  default="true"  doc="Should a mujoco server instance be started?" />
+  <arg name="sim_hw_file" default="$(find franka_mujoco)/config/franka_hw_sim.yaml"  doc="Path to sim hardware interface configuration" />
+  <arg name="sim_controllers_file" default="$(find franka_mujoco)/config/sim_controllers.yaml"  doc="Path to sim controller definitions" />
+
+  <!-- Robot Customization -->
+  <arg name="rviz"          default="true"  doc="Should rviz be spawned?" />
+  <arg name="use_gripper"   default="true"  doc="Should a franka hand be mounted on the flange?" />
+  <arg name="controller"    default=" "     doc="Which example controller should be started? (One of {cartesian_impedance,model,force,joint_position,joint_velocity}_example_controller)" />
+  <arg name="xacro_args"    default=""      doc="Additional arguments to pass to panda.urdf.xacro" />
+  <arg name="scene_xml"     default="$(find franka_mujoco)/assets/xacro/dual_panda.xml.xacro" />
+  <arg name="use_xacro"     default="false" doc="Should the mjxml be generated from the urdf?" />
+  <arg name="xacro_outpath" default="/tmp/$(env USER)_panda_dual.xml" />
+
+  <arg name="modelfile"            default="$(find franka_mujoco)/assets/dual_panda.xml"                     doc="MuJoCo xml file to load. Should define robot model and world." />
+  <arg name="interactive_marker"   default="$(eval arg('controller') == 'cartesian_impedance_example_controller')" doc="Should the interactive marker node be started?" />
+  <arg name="initial_joint_states" default="$(find franka_mujoco)/config/dual_arm_initial_joint_states.yaml"                doc="Location of param file containing the initial joint states" />
+  <arg name="mujoco_plugin_config" default="$(find franka_mujoco)/config/dual_arm_mjplugin_config.yaml"             doc="Location of param file containing the mujoco plugin config" />
+  <arg name="use_sim_time" doc="should mujoco publish its simulation time as ros time?"/>
+
+  <arg name="arm_id_0" default="L_panda" />
+  <arg name="arm_id_1" default="R_panda" />
+
+  <!-- Needed for nesting this launchfile in test launchfiles -->
+  <arg name="headless" default="false" />
+  <arg name="unpause"  default="false" />
+  <arg name="no_x"     default="false" />
+  <arg name="verbose"  default="false" />
+
+  <arg name="x0"           default="-0.5"  doc="How far forward to place the base of the robot in [m]?" />
+  <arg name="y0"           default="0"     doc="How far leftwards to place the base of the robot in [m]?" />
+  <arg name="z0"           default="0"     doc="How far upwards to place the base of the robot in [m]?" />
+  <arg name="roll0"        default="0"     doc="How much to rotate the base of the robot around its X-axis in [rad]?" />
+  <arg name="pitch0"       default="0"     doc="How much to rotate the base of the robot around its Y-axis in [rad]?" />
+  <arg name="yaw0"         default="1.57"  doc="How much to rotate the base of the robot around its Z-axis in [rad]?" />
+
+  <arg name="x1"           default="0.5"   doc="How far forward to place the base of the robot in [m]?" />
+  <arg name="y1"           default="0"     doc="How far leftwards to place the base of the robot in [m]?" />
+  <arg name="z1"           default="0"     doc="How far upwards to place the base of the robot in [m]?" />
+  <arg name="roll1"        default="0"     doc="How much to rotate the base of the robot around its X-axis in [rad]?" />
+  <arg name="pitch1"       default="0"     doc="How much to rotate the base of the robot around its Y-axis in [rad]?" />
+  <arg name="yaw1"         default="1.57"  doc="How much to rotate the base of the robot around its Z-axis in [rad]?" />
+
+  <param name="/use_sim_time" value="$(arg use_sim_time)"/>
+
+  <include file="$(find franka_mujoco)/launch/launch_arm.launch" pass_all_args="true" ns="$(arg arm_id_0)">
+    <arg name="arm_id" value="$(arg arm_id_0)" />
+    <arg name="x"      value="$(arg x0)" />
+    <arg name="y"      value="$(arg y0)" />
+    <arg name="z"      value="$(arg z0)" />
+    <arg name="pitch"  value="$(arg pitch0)" />
+    <arg name="roll"   value="$(arg roll0)" />
+    <arg name="yaw"    value="$(arg yaw0)" />
+  </include>
+
+  <include file="$(find franka_mujoco)/launch/launch_arm.launch" pass_all_args="true" ns="$(arg arm_id_1)">
+    <arg name="arm_id" value="$(arg arm_id_1)" />
+    <arg name="x"      value="$(arg x1)" />
+    <arg name="y"      value="$(arg y1)" />
+    <arg name="z"      value="$(arg z1)" />
+    <arg name="pitch"  value="$(arg pitch1)" />
+    <arg name="roll"   value="$(arg roll1)" />
+    <arg name="yaw"    value="$(arg yaw1)" />
+  </include>
+
+  <rosparam file="$(arg initial_joint_states)" subst_value="true" />
+  <rosparam file="$(arg mujoco_plugin_config)" subst_value="true" />
+  <group unless="$(arg use_xacro)">
+    <include file="$(find mujoco_ros)/launch/launch_server.launch" pass_all_args="true" >
+      <arg name="console_config_file"  value="$(find franka_mujoco)/config/rosconsole.config" />
+    </include>
+  </group>
+
+  <group if="$(arg use_xacro)">
+    <param name="mujoco_xml"
+           command="xacro $(arg scene_xml)
+                     arm_id_0:=$(arg arm_id_0)
+                     x0:=$(arg x0)
+                     y0:=$(arg y0)
+                     z0:=$(arg z0)
+                     roll0:=$(arg roll0)
+                     pitch0:=$(arg pitch0)
+                     yaw0:=$(arg yaw0)
+                     arm_id_1:=$(arg arm_id_1)
+                     x1:=$(arg x1)
+                     y1:=$(arg y1)
+                     z1:=$(arg z1)
+                     roll1:=$(arg roll1)
+                     pitch1:=$(arg pitch1)
+                     yaw1:=$(arg yaw1)
+                     -o $(arg xacro_outpath)" > <!-- hack writing xml to file instead of using rosparam because of MuJoCo Bug -->
+    </param>
+    <include file="$(find mujoco_ros)/launch/launch_server.launch" pass_all_args="true" >
+      <arg name="console_config_file"  value="$(find franka_mujoco)/config/rosconsole.config" />
+      <arg name="modelfile" value="$(arg xacro_outpath)" />
+    </include>
+  </group>
+
+  <node  pkg="rviz" type="rviz" output="screen" name="rviz" args="-d $(find franka_mujoco)/config/franka_dual.rviz" if="$(arg rviz)"/>
+
+</launch>
