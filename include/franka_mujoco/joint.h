@@ -239,9 +239,19 @@ public:
 	/// The PID used for the controller, when in "velocity" control mode. In other modes these gains are ignored
 	control_toolbox::Pid velocity_controller;
 
+	/**
+	 * Sets the joint position.
+	 */
+	void setJointPosition(const double joint_position);
+
 private:
 	double lastVelocity     = std::numeric_limits<double>::quiet_NaN();
 	double lastAcceleration = std::numeric_limits<double>::quiet_NaN();
+
+	// Track joint position set request
+	bool setPositionRequested_ = false;
+	double requestedPosition_  = 0.0;
+	std::mutex requestedPositionMutex_;
 };
 
 } // namespace franka_mujoco

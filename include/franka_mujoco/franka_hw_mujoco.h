@@ -95,11 +95,18 @@
 #include <boost/optional.hpp>
 #include <boost_sml/sml.hpp>
 
+#include <array>
 #include <mutex>
+#include <string>
 
 #include <random>
 
 namespace franka_mujoco {
+
+const double kDefaultTauExtLowpassFilter             = 1.0; // no filtering per default of tau_ext_hat_filtered
+const std::array<std::string, 9> kRobotJointSuffixes = { "_joint1", "_joint2",        "_joint3",
+	                                                      "_joint4", "_joint5",        "_joint6",
+	                                                      "_joint7", "_finger_joint1", "_finger_joint2" };
 
 /**
  * A custom implementation of a robot hardware interface,
@@ -228,7 +235,6 @@ private:
 	franka::RobotState robot_state_;
 	std::unique_ptr<franka_hw::ModelBase> model_;
 
-	const double kDefaultTauExtLowpassFilter = 1.0; // no filtering per default of tau_ext_hat_filtered
 	double tau_ext_lowpass_filter_;
 
 	// Addition of UBI: add noise to fetched joint positions

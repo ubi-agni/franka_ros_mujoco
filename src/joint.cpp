@@ -63,6 +63,14 @@ namespace franka_mujoco {
 
 void Joint::update(const ros::Duration &dt, double position_noise /*= 0.0*/)
 {
+	if (this->setPositionRequested_) {
+		std::lock_guard<std::mutex> lock(this->requestedPositionMutex_);
+		this->position              = this->requestedPosition_;
+		this->desired_position      = this->requestedPosition_;
+		this->stop_position         = this->requestedPosition_;
+		this->setPositionRequested_ = false;
+	}
+
 	double pos = d_ptr->qpos[m_ptr->jnt_qposadr[id]];
 
 	switch (type) {
@@ -145,4 +153,13 @@ bool Joint::isInContact() const
 {
 	return std::abs(effort - command) > contact_threshold;
 }
+
+void Joint::setJointPosition(const double joint_position)
+{
+	// NOTE: Joint position is set in update() method to prevent racing conditions
+	std::lock_guard<std::mutex> lock(this->requestedPositionMutex_);
+	this->requestedPosition_    = joint_position;
+	this->setPositionRequested_ = true;
+}
+
 } // namespace franka_mujoco

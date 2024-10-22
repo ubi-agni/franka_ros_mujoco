@@ -49,6 +49,9 @@ find_package(Franka REQUIRED)
 find_package(Eigen3 REQUIRED)
 find_package(orocos_kdl REQUIRED)
 
+# merge Franka + catkin INCLUDE_DIRS in topological order
+list_insert_in_workspace_order(catkin_INCLUDE_DIRS ${Franka_INCLUDE_DIRS} ${catkin_INCLUDE_DIRS})
+
 catkin_package(
   CATKIN_DEPENDS
     roscpp
@@ -89,7 +92,6 @@ include_directories(
  include
  ${catkin_INCLUDE_DIRS}
  ${EIGEN3_INCLUDE_DIRS}
- ${Franka_INCLUDE_DIRS}
  ${Boost_INCLUDE_DIR}
 )
 
@@ -110,7 +112,6 @@ target_link_libraries(franka_hw_sim_mujoco
    ${orocos_kdl_LIBRARIES}
  )
  target_include_directories(franka_hw_sim_mujoco SYSTEM PUBLIC
-  ${Franka_INCLUDE_DIRS}
   ${EIGEN3_INCLUDE_DIRS}
   ${orocos_kdl_INCLUDE_DIRS}
   ${catkin_INCLUDE_DIRS}

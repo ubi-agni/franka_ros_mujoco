@@ -56,6 +56,8 @@
 
 /* Authors: David P. Leins*/
 
+#include <algorithm>
+
 #include <mujoco_ros/util.h>
 
 #include <joint_limits_interface/joint_limits_urdf.h>
@@ -158,6 +160,14 @@ bool FrankaHWSim::initSim(const mjModel *m_ptr, mjData *d_ptr, mujoco_ros::Mujoc
 		joint->m_ptr = m_ptr;
 		joint->d_ptr = d_ptr;
 
+		if (std::none_of(kRobotJointSuffixes.begin(), kRobotJointSuffixes.end(),
+		                 [&](auto suffix) { return joint->name == arm_id_ + suffix; })) {
+			ROS_WARN_STREAM_NAMED("franka_hw_sim", "Joint '" << joint->name << "' contains a '" << transmission.type_
+			                                                 << "' transmission, but it's not part of the Franka robot. "
+			                                                    "Ignoring this joint in FrankaHWSim.");
+			continue;
+		}
+
 		if (urdf == NULL) {
 			ROS_ERROR_STREAM_NAMED("franka_hw_sim",
 			                       "Could not find any URDF model. Was it loaded on the parameter server?");
@@ -203,7 +213,11 @@ bool FrankaHWSim::initSim(const mjModel *m_ptr, mjData *d_ptr, mujoco_ros::Mujoc
 	// Register all supported command interfaces
 	for (const auto &transmission : transmissions) {
 		for (const auto &k_interface : transmission.joints_[0].hardware_interfaces_) {
-			auto joint = joints_[transmission.joints_[0].name_];
+			auto name = transmission.joints_[0].name_;
+			if (this->joints_.count(name) == 0) {
+				continue;
+			}
+			auto joint = this->joints_[name];
 			if (transmission.type_ == "transmission_interface/SimpleTransmission") {
 				ROS_INFO_STREAM_NAMED("franka_hw_sim",
 				                      "Found transmission interface of joint " << joint->name << " : " << k_interface);
@@ -303,6 +317,12 @@ bool FrankaHWSim::initSim(const mjModel *m_ptr, mjData *d_ptr, mujoco_ros::Mujoc
 		        response.success = true;
 		        return true;
 	        }));
+	serviceServers.push_back(model_nh.advertiseService<std_srvs::SetBool::Request, std_srvs::SetBool::Response>(
+	    "franka_control/set_user_stop", [&](auto &request, auto &response) {
+		    sm_.process_event(UserStop{ static_cast<bool>(request.data) });
+		    response.success = true;
+		    return true;
+	    }));
 
 	service_controller_list_ =
 	    model_nh.serviceClient<controller_manager_msgs::ListControllers>("controller_manager/list_controllers");
