@@ -86,7 +86,9 @@ void Joint::update(const ros::Duration &dt, double position_noise /*= 0.0*/)
 
 	velocity     = d_ptr->qvel[m_ptr->jnt_dofadr[id]];
 	acceleration = d_ptr->qacc[m_ptr->jnt_dofadr[id]];
-	effort       = d_ptr->qfrc_applied[m_ptr->jnt_dofadr[id]];
+	// Apparently, the sign is flipped compared to Gazebo.
+	// We flip it here to match the Gazebo behavior and get the same F_ext values.
+	effort = -d_ptr->qfrc_applied[m_ptr->jnt_dofadr[id]];
 
 	if (std::isnan(lastVelocity))
 		lastVelocity = velocity;
