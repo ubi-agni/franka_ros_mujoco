@@ -62,4 +62,6 @@
         </xacro:if>
     </worldbody>
 
+    <xacro:panda_extra name="$(arg name)" />
+
 </mujoco>
