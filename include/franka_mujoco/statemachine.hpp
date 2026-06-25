@@ -1,7 +1,7 @@
 #pragma once
 
 #include <franka/robot_state.h>
-#include <franka_mujoco/joint.h>
+#include <franka_mujoco/joint.hpp>
 
 #include <ros/ros.h>
 #include <boost_sml/sml.hpp>
@@ -32,10 +32,12 @@ struct UserStop
 };
 
 // Guards
-auto contains   = [](const auto &haystack, const auto &needle) { return haystack.find(needle) != std::string::npos; };
-auto isPressed  = [](const UserStop &event) { return event.pressed; };
-auto isReleased = [](const UserStop &event, const JointMap &joints) { return not event.pressed; };
-auto isStarting = [](const SwitchControl &event, const JointMap &joints) {
+inline const auto contains = [](const auto &haystack, const auto &needle) {
+	return haystack.find(needle) != std::string::npos;
+};
+inline const auto isPressed  = [](const UserStop &event) { return event.pressed; };
+inline const auto isReleased = [](const UserStop &event, const JointMap &joints) { return not event.pressed; };
+inline const auto isStarting = [](const SwitchControl &event, const JointMap &joints) {
 	for (auto &joint : joints) {
 		if (contains(joint.first, "_finger_joint")) {
 			continue;
@@ -46,12 +48,12 @@ auto isStarting = [](const SwitchControl &event, const JointMap &joints) {
 	}
 	return false;
 };
-auto isStopping = [](const SwitchControl &event, const JointMap &joints) { return not isStarting(event, joints); };
+inline const auto isStopping = [](const SwitchControl &event, const JointMap &joints) { return not isStarting(event, joints); };
 
 // Actions
-auto start = [](franka::RobotState &state) { state.robot_mode = franka::RobotMode::kMove; };
-auto idle  = [](franka::RobotState &state) { state.robot_mode = franka::RobotMode::kIdle; };
-auto stop  = [](franka::RobotState &state, JointMap &joints) {
+inline const auto start = [](franka::RobotState &state) { state.robot_mode = franka::RobotMode::kMove; };
+inline const auto idle  = [](franka::RobotState &state) { state.robot_mode = franka::RobotMode::kIdle; };
+inline const auto stop  = [](franka::RobotState &state, JointMap &joints) {
    ROS_WARN("User stop pressed, stopping robot");
    state.robot_mode = franka::RobotMode::kUserStopped;
    state.q_d        = state.q;

@@ -1,6 +1,6 @@
 #include <gtest/gtest.h>
 
-#include <franka_mujoco/model_kdl.h>
+#include <franka_mujoco/model_kdl.hpp>
 #include <Eigen/Dense>
 #include <string>
 

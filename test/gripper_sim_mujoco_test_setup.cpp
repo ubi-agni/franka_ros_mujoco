@@ -1,4 +1,4 @@
-#include "gripper_sim_mujoco_test_setup.h"
+#include "gripper_sim_mujoco_test_setup.hpp"
 #include <mujoco_ros_msgs/SetBodyState.h>
 #include <mujoco_ros_msgs/GetStateUint.h>
 #include <ros/ros.h>

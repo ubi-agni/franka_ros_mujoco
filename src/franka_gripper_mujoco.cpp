@@ -57,9 +57,10 @@
 #include <cmath>
 #include <memory>
 
+#include <boost/bind/bind.hpp>
 #include <pluginlib/class_list_macros.h>
 
-#include <franka_mujoco/franka_gripper_mujoco.h>
+#include <franka_mujoco/franka_gripper_mujoco.hpp>
 
 namespace franka_mujoco {
 
@@ -109,11 +110,11 @@ bool FrankaGripperMujoco::init(hardware_interface::EffortJointInterface *hw, ros
 	pub_.unlock();
 
 	action_stop_ = std::make_unique<SimpleActionServer<StopAction>>(
-	    nh, "stop", boost::bind(&FrankaGripperMujoco::onStopGoal, this, _1), false);
+	    nh, "stop", boost::bind(&FrankaGripperMujoco::onStopGoal, this, boost::placeholders::_1), false);
 	action_stop_->start();
 
 	action_homing_ = std::make_unique<SimpleActionServer<HomingAction>>(
-	    nh, "homing", boost::bind(&FrankaGripperMujoco::onHomingGoal, this, _1), false);
+	    nh, "homing", boost::bind(&FrankaGripperMujoco::onHomingGoal, this, boost::placeholders::_1), false);
 	action_homing_->registerPreemptCallback([&]() {
 		ROS_INFO_STREAM_NAMED("FrankaGripperMujoco", "Homing Action cancelled");
 		setState(State::IDLE);
@@ -121,7 +122,7 @@ bool FrankaGripperMujoco::init(hardware_interface::EffortJointInterface *hw, ros
 	action_homing_->start();
 
 	action_move_ = std::make_unique<SimpleActionServer<MoveAction>>(
-	    nh, "move", boost::bind(&FrankaGripperMujoco::onMoveGoal, this, _1), false);
+	    nh, "move", boost::bind(&FrankaGripperMujoco::onMoveGoal, this, boost::placeholders::_1), false);
 	action_move_->registerPreemptCallback([&]() {
 		ROS_INFO_STREAM_NAMED("FrankaGripperMujoco", "Moving Action cancelled");
 		setState(State::IDLE);
@@ -129,7 +130,7 @@ bool FrankaGripperMujoco::init(hardware_interface::EffortJointInterface *hw, ros
 	action_move_->start();
 
 	action_grasp_ = std::make_unique<SimpleActionServer<GraspAction>>(
-	    nh, "grasp", boost::bind(&FrankaGripperMujoco::onGraspGoal, this, _1), false);
+	    nh, "grasp", boost::bind(&FrankaGripperMujoco::onGraspGoal, this, boost::placeholders::_1), false);
 	action_grasp_->registerPreemptCallback([&]() {
 		ROS_INFO_STREAM_NAMED("FrankaGripperMujoco", "Grasping Action cancelled");
 		setState(State::IDLE);
@@ -137,7 +138,7 @@ bool FrankaGripperMujoco::init(hardware_interface::EffortJointInterface *hw, ros
 	action_grasp_->start();
 
 	action_gc_ = std::make_unique<SimpleActionServer<GripperCommandAction>>(
-	    nh, "gripper_action", boost::bind(&FrankaGripperMujoco::onGripperActionGoal, this, _1), false);
+	    nh, "gripper_action", boost::bind(&FrankaGripperMujoco::onGripperActionGoal, this, boost::placeholders::_1), false);
 	action_gc_->registerPreemptCallback([&]() {
 		ROS_INFO_STREAM_NAMED("FrankaGripperMujoco", "Gripper Command Action cancelled");
 		setState(State::IDLE);

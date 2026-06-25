@@ -18,11 +18,16 @@
  *********************************************************************/
 
 #pragma once
-#include <franka_mujoco/joint.h>
+#include <franka_mujoco/joint.hpp>
 #include <hardware_interface/controller_info.h>
 #include <hardware_interface/interface_resources.h>
 #include <hardware_interface/internal/hardware_resource_manager.h>
 #include <boost/optional.hpp>
+#include <map>
+#include <memory>
+#include <set>
+#include <string>
+#include <vector>
 
 namespace franka_mujoco {
 

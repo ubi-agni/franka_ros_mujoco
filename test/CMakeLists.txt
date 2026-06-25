@@ -44,7 +44,7 @@ target_include_directories(franka_hw_sim_mujoco_test PUBLIC
 add_rostest_gtest(franka_gripper_sim_mujoco_test launch/franka_gripper_sim_mujoco.test
   franka_gripper_sim_mujoco_test.cpp
   gripper_sim_mujoco_test_setup.cpp
-  gripper_sim_mujoco_test_setup.h
+  gripper_sim_mujoco_test_setup.hpp
 )
 
 add_dependencies(franka_gripper_sim_mujoco_test
@@ -65,7 +65,7 @@ add_rostest_gtest(franka_gripper_sim_mujoco_test_with_object
   launch/franka_gripper_sim_mujoco_with_object.test
   franka_gripper_sim_mujoco_test_with_object.cpp
   gripper_sim_mujoco_test_setup.cpp
-  gripper_sim_mujoco_test_setup.h
+  gripper_sim_mujoco_test_setup.hpp
 )
 
 add_dependencies(franka_gripper_sim_mujoco_test_with_object

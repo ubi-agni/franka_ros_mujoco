@@ -57,7 +57,7 @@
 
 #include <urdf/model.h>
 
-#include <franka_mujoco/joint.h>
+#include <franka_mujoco/joint.hpp>
 
 namespace franka_mujoco {
 

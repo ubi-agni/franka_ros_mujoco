@@ -12,9 +12,9 @@
 #include <franka_msgs/ErrorRecoveryAction.h>
 #include <franka_msgs/FrankaState.h>
 
-#include <franka_mujoco/franka_gripper_mujoco.h>
-#include <franka_mujoco/joint.h>
-#include <franka_mujoco/statemachine.h>
+#include <franka_mujoco/franka_gripper_mujoco.hpp>
+#include <franka_mujoco/joint.hpp>
+#include <franka_mujoco/statemachine.hpp>
 
 #include <gtest/gtest.h>
 

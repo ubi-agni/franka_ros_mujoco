@@ -17,7 +17,9 @@
  *  - namespace
  *********************************************************************/
 
-#include <franka_mujoco/controller_verifier.h>
+#include <franka_mujoco/controller_verifier.hpp>
+
+#include <algorithm>
 
 namespace franka_mujoco {
 

@@ -58,7 +58,7 @@
 
 #include <algorithm>
 
-#include <mujoco_ros/util.h>
+#include <mujoco_ros/util.hpp>
 
 #include <joint_limits_interface/joint_limits_urdf.h>
 #include <boost/algorithm/clamp.hpp>
@@ -70,8 +70,8 @@
 #include <franka_hw/franka_hw.h>
 #include <franka_example_controllers/pseudo_inversion.h>
 
-#include <franka_mujoco/franka_hw_mujoco.h>
-#include <franka_mujoco/model_kdl.h>
+#include <franka_mujoco/franka_hw_mujoco.hpp>
+#include <franka_mujoco/model_kdl.hpp>
 
 #include <std_msgs/Bool.h>
 #include <std_srvs/SetBool.h>
@@ -85,9 +85,10 @@ using boost::sml::state;
 
 FrankaHWSim::FrankaHWSim() : sm_(this->robot_state_, this->joints_) {}
 
-bool FrankaHWSim::initSim(const mjModel *m_ptr, mjData *d_ptr, mujoco_ros::MujocoEnv *mujoco_env_ptr,
-                          const std::string &robot_namespace, ros::NodeHandle model_nh, const urdf::Model *const urdf,
-                          std::vector<transmission_interface::TransmissionInfo> transmissions)
+bool FrankaHWSim::InitSim(const mjModel *m_ptr, mjData *d_ptr, mujoco_ros::MujocoEnv *mujoco_env_ptr,
+                         const std::string &robot_namespace, ros::NodeHandle model_nh, const urdf::Model *const urdf,
+                         std::vector<transmission_interface::TransmissionInfo> transmissions,
+                         bool /*ignore_actuators*/)
 {
 	m_ptr_          = m_ptr;
 	d_ptr_          = d_ptr;
@@ -317,13 +318,6 @@ bool FrankaHWSim::initSim(const mjModel *m_ptr, mjData *d_ptr, mujoco_ros::Mujoc
 		        response.success = true;
 		        return true;
 	        }));
-	serviceServers.push_back(model_nh.advertiseService<std_srvs::SetBool::Request, std_srvs::SetBool::Response>(
-	    "franka_control/set_user_stop", [&](auto &request, auto &response) {
-		    sm_.process_event(UserStop{ static_cast<bool>(request.data) });
-		    response.success = true;
-		    return true;
-	    }));
-
 	service_controller_list_ =
 	    model_nh.serviceClient<controller_manager_msgs::ListControllers>("controller_manager/list_controllers");
 	service_controller_switch_ =
@@ -503,7 +497,7 @@ bool FrankaHWSim::setCollisionBehaviorCB(franka_msgs::SetForceTorqueCollisionBeh
 	return true;
 }
 
-void FrankaHWSim::readSim(ros::Time time, ros::Duration period)
+void FrankaHWSim::ReadSim(ros::Time time, ros::Duration period)
 {
 	for (const auto &pair : joints_) {
 		auto joint = pair.second;
@@ -546,7 +540,7 @@ double FrankaHWSim::velocityControl(Joint &joint, double setpoint, const ros::Du
 	                               -joint.limits.max_effort, joint.limits.max_effort);
 }
 
-void FrankaHWSim::writeSim(ros::Time time, ros::Duration period)
+void FrankaHWSim::WriteSim(ros::Time time, ros::Duration period)
 {
 	// Update gravity, since it currently can be changed at runtime in mujoco_ros
 	auto g = model_->gravity(robot_state_, { m_ptr_->opt.gravity[0], m_ptr_->opt.gravity[1], m_ptr_->opt.gravity[2] });
@@ -844,7 +838,7 @@ void FrankaHWSim::forControlledJoint(const std::list<hardware_interface::Control
 	}
 }
 
-void FrankaHWSim::eStopActive(bool /* active */) {}
+void FrankaHWSim::EStopActive(bool /* active */) {}
 
 } // namespace franka_mujoco
 

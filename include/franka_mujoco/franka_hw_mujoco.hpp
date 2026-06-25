@@ -60,7 +60,7 @@
 
 #include <ros/ros.h>
 
-#include <mujoco_ros_control/robot_hw_sim.h>
+#include <mujoco_ros_control/robot_hw_sim.hpp>
 #include <mujoco_ros_msgs/SetFloat.h>
 
 #include <actionlib/server/simple_action_server.h>
@@ -78,9 +78,9 @@
 
 #include <urdf/model.h>
 
-#include <franka_mujoco/controller_verifier.h>
-#include <franka_mujoco/joint.h>
-#include <franka_mujoco/statemachine.h>
+#include <franka_mujoco/controller_verifier.hpp>
+#include <franka_mujoco/joint.hpp>
+#include <franka_mujoco/statemachine.hpp>
 
 #include <franka_msgs/ErrorRecoveryAction.h>
 #include <franka_msgs/SetEEFrame.h>
@@ -96,10 +96,16 @@
 #include <boost_sml/sml.hpp>
 
 #include <array>
+#include <functional>
+#include <iterator>
+#include <map>
+#include <memory>
 #include <mutex>
-#include <string>
-
 #include <random>
+#include <sstream>
+#include <stdexcept>
+#include <string>
+#include <vector>
 
 namespace franka_mujoco {
 
@@ -146,9 +152,10 @@ public:
 	 * @param[in] transmissions a list of transmissions of the model which should be simulated
 	 * @return `true` if initialization succeeds, `false` otherwise
 	 */
-	bool initSim(const mjModel *m_ptr, mjData *d, mujoco_ros::MujocoEnv *mujoco_env_ptr,
+	bool InitSim(const mjModel *m_ptr, mjData *d, mujoco_ros::MujocoEnv *mujoco_env_ptr,
 	             const std::string &robot_namespace, ros::NodeHandle model_nh, const urdf::Model *const urdf,
-	             std::vector<transmission_interface::TransmissionInfo> transmissions) override;
+	             std::vector<transmission_interface::TransmissionInfo> transmissions,
+	             bool ignore_actuators = false) override;
 
 	/**
 	 * Fetch data from the MuJoCo simulation and pass it on to the hardware interfaces.
@@ -162,7 +169,7 @@ public:
 	* @param[in] time   the current (simulated) ROS time
 	* @param[in] period the time step at which the simulation is running
 	*/
-	void readSim(ros::Time time, ros::Duration period) override;
+	void ReadSim(ros::Time time, ros::Duration period) override;
 
 	/**
 	 * Pass the data send from controllers via the hardware interfaces onto the simulation.
@@ -174,14 +181,14 @@ public:
 	 * @param[in] time   the current (simulated) ROS time
 	 * @param[in] period the time step at which the simulation is running
 	 */
-	void writeSim(ros::Time time, ros::Duration period) override;
+	void WriteSim(ros::Time time, ros::Duration period) override;
 
 	/**
 	 * Set the emergency stop state (not yet implemented)
 	 *
 	 * @param[in] active does currently nothing.
 	 */
-	void eStopActive(const bool active) override;
+	void EStopActive(const bool active) override;
 
 	/**
 	 * Switches the control mode of the robot arm

@@ -13,7 +13,7 @@
   <arg name="controller"  default="joint_position_example_controller"     doc="Which example controller should be started? (One of {cartesian_impedance,model,force,joint_position,joint_velocity}_example_controller)" />
   <arg name="xacro_args"  default=""      doc="Additional arguments to pass to panda.urdf.xacro" />
 
-  <arg name="modelfile"            default="$(find franka_mujoco)/assets/dual_panda_notilt_nohuman.xml"                  doc="MuJoCo xml file to load. Should define robot model and world." />
+  <arg name="modelfile"            default="$(find franka_mujoco)/assets/panda.xml"                  doc="MuJoCo xml file to load. Should define robot model and world." />
   <arg name="interactive_marker"   default="$(eval arg('controller') == 'cartesian_impedance_example_controller')" doc="Should the interactive marker node be started?" />
   <arg name="mujoco_plugin_config" default="$(find franka_mujoco)/config/default_mjplugin_config.yaml"             doc="Location of param file containing the mujoco plugin config" />
   <arg name="use_sim_time" doc="should mujoco publish its simulation time as ros time?"/>
@@ -39,6 +39,7 @@
                   gazebo:=true
                   hand:=$(arg use_gripper)
                   arm_id:=$(arg arm_id)
+                  parent:=world
                   xyz:='$(arg x) $(arg y) $(arg z)'
                   rpy:='$(arg roll) $(arg pitch) $(arg yaw)'
                   $(arg xacro_args)">

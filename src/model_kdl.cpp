@@ -22,6 +22,7 @@
 #include <Eigen/Dense>
 #include <algorithm>
 #include <array>
+#include <stdexcept>
 #include <kdl/chain.hpp>
 #include <kdl/chainfksolverpos_recursive.hpp>
 #include <kdl/frames.hpp>
@@ -29,7 +30,7 @@
 #include <kdl/tree.hpp>
 #include <kdl_parser/kdl_parser.hpp>
 
-#include <franka_mujoco/model_kdl.h>
+#include <franka_mujoco/model_kdl.hpp>
 
 namespace franka_mujoco {
 

@@ -57,8 +57,8 @@
 
 #pragma once
 
-#include <mujoco_ros/mujoco_env.h>
-#include <mujoco_ros/common_types.h>
+#include <mujoco_ros/mujoco_env.hpp>
+#include <mujoco_ros/common_types.hpp>
 
 #include <angles/angles.h>
 #include <control_toolbox/pid.h>
@@ -67,6 +67,9 @@
 #include <ros/ros.h>
 #include <Eigen/Dense>
 #include <boost/optional.hpp>
+#include <limits>
+#include <mutex>
+#include <string>
 
 namespace franka_mujoco {
 

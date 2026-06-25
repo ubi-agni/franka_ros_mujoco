@@ -1,4 +1,4 @@
-#include <franka_mujoco/controller_verifier.h>
+#include <franka_mujoco/controller_verifier.hpp>
 #include <gtest/gtest.h>
 
 static const std::string effort   = "hardware_interface::EffortJointInterface";

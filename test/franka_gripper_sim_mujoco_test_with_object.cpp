@@ -5,7 +5,7 @@
 #include <gtest/gtest.h>
 #include <ros/ros.h>
 
-#include "gripper_sim_mujoco_test_setup.h"
+#include "gripper_sim_mujoco_test_setup.hpp"
 
 static const double kAllowedPositionError = 5e-3;
 static const double kAllowedForceError    = 3;
